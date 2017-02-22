@@ -8,18 +8,19 @@ import (
 )
 
 const cYaml = `
-sp:
-  expand: smirnov.wiki/project
-  h:
-    expand: hydra
-sg:
-  expand: smirnov.wiki/goals
-  'n':
-    expand: 2017
-sd:
-  expand: smirnov.wiki/device
-  p:
-    expand: puma
+e:
+  expand: example.com
+  a:
+    expand: apples
+  b:
+    expand: bananas
+g:
+  expand: github.com
+  d:
+    expand: issmirnov/dotfiles
+  z:
+    expand: issmirnov/zap
+
 `
 
 func parseDummyYaml() (*gabs.Container, error) {

@@ -1,113 +1,104 @@
 package main
 
 import (
-	"bytes"
-	"testing"
+    "bytes"
+    "testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+    . "github.com/smartystreets/goconvey/convey"
 )
 
 func TestTokenizer(t *testing.T) {
-	Convey("Given a string 'sp/h/monitoring'", t, func() {
-		l := tokenize("sp/h/monitoring")
-		Convey("The resulting list should have length 3", func() {
-			So(l.Len(), ShouldEqual, 3)
-		})
-	})
+    Convey("Given a string 'g/z'", t, func() {
+        l := tokenize("g/z")
+        Convey("The resulting list should", func() {
 
-	Convey("Given a string 'sp/h'", t, func() {
-		l := tokenize("sp/h")
-		Convey("The resulting list should", func() {
+            Convey("Have length 2", func() {
+                So(l.Len(), ShouldEqual, 2)
+            })
+            Convey("The first element should be equal to 'g'", func() {
+                So(l.Front().Value, ShouldEqual, "g")
+            })
+            Convey("The last element should be equal to 'z'", func() {
+                So(l.Back().Value, ShouldEqual, "z")
+            })
+        })
+    })
 
-			Convey("Have length 2", func() {
-				So(l.Len(), ShouldEqual, 2)
-			})
-			Convey("The first element should be equal to 'sp'", func() {
-				So(l.Front().Value, ShouldEqual, "sp")
-			})
-			Convey("The last element should be equal to 'h'", func() {
-				So(l.Back().Value, ShouldEqual, "h")
-			})
-		})
-	})
+    Convey("Given a string 'e/a/extratext'", t, func() {
+        l := tokenize("e/a/extratext")
+        Convey("The resulting list should have length 3", func() {
+            So(l.Len(), ShouldEqual, 3)
+        })
+    })
 
-	Convey("Given a string 'sg/n'", t, func() {
-		l := tokenize("sg/n")
-		Convey("The resulting list should", func() {
-
-			Convey("Have length 2", func() {
-				So(l.Len(), ShouldEqual, 2)
-			})
-			Convey("The first element should be equal to 'sg'", func() {
-				So(l.Front().Value, ShouldEqual, "sg")
-			})
-			Convey("The last element should be equal to 'g'", func() {
-				So(l.Back().Value, ShouldEqual, "n")
-			})
-		})
-	})
+    Convey("Given a string 'e/a/extratext/'", t, func() {
+        l := tokenize("e/a/extratext/")
+        Convey("The resulting list should have length 4", func() {
+            So(l.Len(), ShouldEqual, 4) // Since we have nil terminator.
+        })
+    })
 }
 
 func TestExpander(t *testing.T) {
 
-	Convey("Given 'sp/h'", t, func() {
-		c, _ := parseDummyYaml()
-		l := tokenize("sp/h")
-		var res bytes.Buffer
-		res.WriteString("https:/")
+    Convey("Given 'g/z'", t, func() {
+        c, _ := parseDummyYaml()
+        l := tokenize("g/z")
+        var res bytes.Buffer
+        res.WriteString("https:/")
 
-		expand(c, l.Front(), &res)
+        expand(c, l.Front(), &res)
 
-		Convey("result should equal 'https://smirnov.wiki/project/hydra'", func() {
-			So(res.String(), ShouldEqual, "https://smirnov.wiki/project/hydra")
-		})
-	})
-	// Convey("Given 'sg/n'", t, func() {
-	//     c, _ := parseDummyYaml()
-	//     l := tokenize("sg/n ")
-	//     var res bytes.Buffer
-	//     res.WriteString("https:/")
-	//
-	//     expand(c, l.Front(), &res)
-	//
-	//     Convey("result should equal 'https://smirnov.wiki/goals/2017'", func() {
-	//         So(res.String(), ShouldEqual, "https://smirnov.wiki/goals/2017")
-	//     })
-	// })
-	Convey("Given 'sp/h/monitoring'", t, func() {
-		c, _ := parseDummyYaml()
-		l := tokenize("sp/h/monitoring")
-		var res bytes.Buffer
-		res.WriteString("https:/")
+        Convey("result should equal 'https://github.com/issmirnov/zap'", func() {
+            So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap")
+        })
+    })
+    // Convey("Given 'e/n'", t, func() {
+    //     c, _ := parseDummyYaml()
+    //     l := tokenize("e/n ")
+    //     var res bytes.Buffer
+    //     res.WriteString("https:/")
+    //
+    //     expand(c, l.Front(), &res)
+    //
+    //     Convey("result should equal 'https://example.com/999'", func() {
+    //         So(res.String(), ShouldEqual, "https://example.com/999")
+    //     })
+    // })
+    Convey("Given 'g/z/extratext'", t, func() {
+        c, _ := parseDummyYaml()
+        l := tokenize("g/z/extratext")
+        var res bytes.Buffer
+        res.WriteString("https:/")
 
-		expand(c, l.Front(), &res)
+        expand(c, l.Front(), &res)
 
-		Convey("result should equal 'https://smirnov.wiki/project/hydra/monitoring'", func() {
-			So(res.String(), ShouldEqual, "https://smirnov.wiki/project/hydra/monitoring")
-		})
-	})
-	Convey("Given 'sp/random'", t, func() {
-		c, _ := parseDummyYaml()
-		l := tokenize("sp/random")
-		var res bytes.Buffer
-		res.WriteString("https:/")
+        Convey("result should equal 'https://github.com/issmirnov/zap/extratext'", func() {
+            So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap/extratext")
+        })
+    })
+    Convey("Given 'g/'", t, func() {
+        c, _ := parseDummyYaml()
+        l := tokenize("g/")
+        var res bytes.Buffer
+        res.WriteString("https:/")
 
-		expand(c, l.Front(), &res)
+        expand(c, l.Front(), &res)
 
-		Convey("result should equal 'https://smirnov.wiki/project/random'", func() {
-			So(res.String(), ShouldEqual, "https://smirnov.wiki/project/random")
-		})
-	})
-	Convey("Given 'sp/h/very/deep/path'", t, func() {
-		c, _ := parseDummyYaml()
-		l := tokenize("sp/h/very/deep/path")
-		var res bytes.Buffer
-		res.WriteString("https:/")
+        Convey("result should equal 'https://github.com/'", func() {
+            So(res.String(), ShouldEqual, "https://github.com/")
+        })
+    })
+    Convey("Given 'g/z/very/deep/path'", t, func() {
+        c, _ := parseDummyYaml()
+        l := tokenize("g/z/very/deep/path")
+        var res bytes.Buffer
+        res.WriteString("https:/")
 
-		expand(c, l.Front(), &res)
+        expand(c, l.Front(), &res)
 
-		Convey("result should equal 'https://smirnov.wiki/project/hydra/very/deep/path'", func() {
-			So(res.String(), ShouldEqual, "https://smirnov.wiki/project/hydra/very/deep/path")
-		})
-	})
+        Convey("result should equal 'https://github.com/issmirnov/zap/very/deep/path'", func() {
+            So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap/very/deep/path")
+        })
+    })
 }

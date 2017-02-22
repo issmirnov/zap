@@ -4,9 +4,12 @@ import (
     "flag"
     "fmt"
     "net/http"
+    "os"
 )
 
 const appName = "zap"
+
+var version = "develop"
 
 func main() {
 
@@ -15,8 +18,14 @@ func main() {
         port       = flag.Int("port", 8927, "port to bind to")
         host       = flag.String("host", "127.0.0.1", "host interface")
         i          = flag.String("index", "start", "string to append if path has trailing slash")
+        v          = flag.Bool("v", false, "print version info")
     )
     flag.Parse()
+
+    if *v {
+        fmt.Println(version)
+        os.Exit(0)
+    }
 
     c, err := parseYaml(*configName)
     if err != nil {
