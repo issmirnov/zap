@@ -1,0 +1,43 @@
+sp:
+  expand: smirnov.wiki/project
+  h:
+    expand: hydra
+    m:
+      expand: monitoring
+  a:
+    expand: ansible
+  z:
+    expand: zap
+sg:
+  expand: smirnov.wiki/goals
+  'n':
+    expand: 2017
+  '18':
+    expand: 2018
+sd:
+  expand: smirnov.wiki/device
+  p:
+    expand: puma
+    s:
+      expand: services
+s:
+  expand: smirnov.wiki
+sc:
+  expand: smirnov.wiki/cycles
+  w:
+    expand: weekly
+  m:
+    expand: monthly
+gh:
+  expand: github.com
+  d:
+    expand: issmirnov/dotfiles
+g:
+  expand: git.smirnov.work
+  f:
+    expand: smivan/fleet
+  s: 
+    expand: smivan/srm
+  z:
+    expand: smivan/zap
+
