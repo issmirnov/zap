@@ -1,0 +1,16 @@
+language: go
+sudo: false
+
+go:
+  - 1.6
+  - 1.7
+  - 1.8  
+  - tip
+
+install:
+  - go get -t ./...
+
+script: go test -short -v ./...
+
+after_success:
+  test -n "$TRAVIS_TAG" && go get github.com/goreleaser/goreleaser && goreleaser
