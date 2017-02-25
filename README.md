@@ -1,6 +1,10 @@
 # Zap (WIP)
 
-![Build Status](https://travis-ci.org/issmirnov/zap.svg?branch=master) [![Powered By: GoReleaser](https://img.shields.io/badge/powered%20by-goreleaser-green.svg?style=flat-square)](https://github.com/goreleaser)
+![Travis](https://travis-ci.org/issmirnov/zap.svg?branch=master)
+[![Release](https://img.shields.io/github/release/issmirnov/zap.svg?style=flat-square)](https://github.com/goreleaser/goreleaser/releases/latest)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Go Report Card](https://goreportcard.com/badge/github.com/issmirnov/zap?style=flat-square)](https://goreportcard.com/report/github.com/goreleaser/goreleaser)
+[![Powered By: GoReleaser](https://img.shields.io/badge/powered%20by-goreleaser-green.svg?style=flat-square)](https://github.com/goreleaser)
 
 A simple recursive URL expander.
 
@@ -121,12 +125,9 @@ Handy commands for local dev:
 
 A short list of upcoming features and fixes, sorted by deadline.
 
-- GoReleaser for release automation - DONE
-- Homebrew install script - DONE
-- Systemd service script
+- Systemd service script + ubuntu install instructions.
 - configurable index page. so 'start' or 'index.html', set in top level domain config.
 - queries: so `s/dns` -> `smirnov.wiki/start?do=search&id=dns`
-- Travis CI
 - coverage and go health report badges
 - ansible role to facilitate installation
 - add check for dual "expand" keys in config

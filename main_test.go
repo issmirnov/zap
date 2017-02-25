@@ -1,10 +1,10 @@
 package main
 
 import (
-  "fmt"
+	"fmt"
 
-  "github.com/Jeffail/gabs"
-  "github.com/ghodss/yaml"
+	"github.com/Jeffail/gabs"
+	"github.com/ghodss/yaml"
 )
 
 const cYaml = `
@@ -24,12 +24,12 @@ g:
 `
 
 func parseDummyYaml() (*gabs.Container, error) {
-  d, jsonErr := yaml.YAMLToJSON([]byte(cYaml))
-  if jsonErr != nil {
-    fmt.Printf("Error encoding input to JSON.\n%s\n", jsonErr.Error())
-    return nil, jsonErr
-  }
-  j, _ := gabs.ParseJSON(d)
-  return j, nil
+	d, jsonErr := yaml.YAMLToJSON([]byte(cYaml))
+	if jsonErr != nil {
+		fmt.Printf("Error encoding input to JSON.\n%s\n", jsonErr.Error())
+		return nil, jsonErr
+	}
+	j, _ := gabs.ParseJSON(d)
+	return j, nil
 
 }
