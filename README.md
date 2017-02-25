@@ -1,4 +1,4 @@
-# Zap (WIP)
+# Zap 
 
 ![Travis](https://travis-ci.org/issmirnov/zap.svg?branch=master)
 [![Release](https://img.shields.io/github/release/issmirnov/zap.svg?style=flat-square)](https://github.com/goreleaser/goreleaser/releases/latest)
@@ -7,8 +7,6 @@
 [![Powered By: GoReleaser](https://img.shields.io/badge/powered%20by-goreleaser-green.svg?style=flat-square)](https://github.com/goreleaser)
 
 A simple recursive URL expander.
-
-**Note: As of right now, this repo is still being set up. This message will be removed when everything is ready.**
 
 ## Overview
 
