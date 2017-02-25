@@ -12,5 +12,6 @@ install:
 
 script: go test -short -v ./...
 
-after_success:
-  test -n "$TRAVIS_TAG" && go get github.com/goreleaser/goreleaser && goreleaser
+# getting errors on https://github.com/goreleaser/goreleaser/blob/master/pipeline/release/release.go#L55
+#after_success:
+#  test -n "$TRAVIS_TAG" && go get github.com/goreleaser/goreleaser && goreleaser
