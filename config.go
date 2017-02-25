@@ -11,6 +11,9 @@ import (
 // expandKey is used to get expand mapping
 const expandKey string = "expand"
 
+// queryKey is used to get search prefix
+const queryKey string = "query"
+
 // parseYaml takes a file name and returns a gabs config object.
 func parseYaml(fname string) (*gabs.Container, error) {
 	data, err := ioutil.ReadFile(fname)

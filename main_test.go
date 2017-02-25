@@ -20,6 +20,8 @@ g:
     expand: issmirnov/dotfiles
   z:
     expand: issmirnov/zap
+  s:
+    query: "search?q="
 
 `
 

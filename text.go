@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"container/list"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -21,6 +22,32 @@ func tokenize(path string) *list.List {
 	return l
 }
 
+// Returns error if neither value present.
+func getPrefix(c *gabs.Container) (string, error) {
+	d := c.Path(expandKey).Data()
+	if d != nil {
+		s, oks := d.(string)
+		i, oki := d.(float64)
+		if oks {
+			return fmt.Sprintf("%s", s), nil
+		} else if oki {
+			return fmt.Sprintf("%.f", i), nil
+		} else {
+			return "", errors.New(fmt.Sprintf("Unexpected type of expansion value, got %T instead of int or string.", d))
+		}
+	}
+	q := c.Path(queryKey).Data()
+	if q != nil {
+		if s, ok := q.(string); ok {
+			return s, nil
+		} else {
+			return "", errors.New(fmt.Sprintf("Casting query key to string failed for %T:%v", q, q))
+		}
+	}
+
+	return "", errors.New(fmt.Sprintf("error in config, no expand or query key in %s\n", c.String()))
+
+}
 func expand(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 	// base case
 	if token == nil {
@@ -30,19 +57,12 @@ func expand(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 	children, _ := c.ChildrenMap()
 	for key, child := range children {
 		if key == token.Value {
-			d := child.Path(expandKey).Data()
-			if d == nil {
-				fmt.Printf("error in config, no expand key in %s\n", c.String())
+			p, err := getPrefix(child)
+			if err != nil {
+				fmt.Println(err.Error())
+				return
 			}
-			s, oks := d.(string)
-			i, oki := d.(float64)
-			if oks {
-				res.WriteString(s)
-			} else if oki {
-				res.WriteString(fmt.Sprintf("%.f", i))
-			} else {
-				fmt.Printf("Unexpected type of expansion value, got %T instead of int or string.", d)
-			}
+			res.WriteString(p)
 			expand(child, token.Next(), res)
 			return
 		}
