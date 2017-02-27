@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/Jeffail/gabs"
 )
@@ -13,8 +12,6 @@ import (
 type context struct {
 	// Json container with path configs
 	config *gabs.Container
-	// String to append to path for trailing slashes
-	index string
 }
 
 type ctxWrapper struct {
@@ -36,6 +33,7 @@ func (cw ctxWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// IndexHandler handles all the non status expansions.
 func IndexHandler(a *context, w http.ResponseWriter, r *http.Request) (int, error) {
 	var host string
 	if r.Header.Get("X-Forwarded-Host") != "" {
@@ -45,9 +43,9 @@ func IndexHandler(a *context, w http.ResponseWriter, r *http.Request) (int, erro
 	}
 
 	// massage the path, appending string to trailing slash if needed
-	if strings.HasSuffix(r.URL.Path, "/") {
-		r.URL.Path += a.index // TODO make this dependent on TLD
-	}
+	// if strings.HasSuffix(r.URL.Path, "/") {
+	// 	r.URL.Path += a.index // TODO make this dependent on TLD
+	// }
 
 	tokens := tokenize(host + r.URL.Path)
 	var res bytes.Buffer
@@ -67,7 +65,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, `OK`)
 }
 
-// StatusHandler responds to /statusz request and prints config.
+// VarsHandler responds to /varz request and prints config.
 func VarsHandler(c *context, w http.ResponseWriter, r *http.Request) (int, error) {
 	w.WriteHeader(http.StatusOK)
 	io.WriteString(w, "Config: "+c.config.String())
