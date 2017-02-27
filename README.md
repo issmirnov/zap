@@ -1,7 +1,7 @@
 # Zap 
 
-![Travis](https://travis-ci.org/issmirnov/zap.svg?branch=master)
-[![Release](https://img.shields.io/github/release/issmirnov/zap.svg?style=flat-square)](https://github.com/goreleaser/goreleaser/releases/latest)
+[![Travis](https://travis-ci.org/issmirnov/zap.svg?branch=master)](https://travis-ci.org/issmirnov/zap)
+[![Release](https://img.shields.io/github/release/issmirnov/zap.svg?style=flat-square)](https://github.com/issmirnov/zap/releases/latest)
 ![Total Downloads](https://img.shields.io/github/downloads/issmirnov/zap/total.svg)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Go Report Card](https://goreportcard.com/badge/github.com/issmirnov/zap?style=flat-square)](https://goreportcard.com/report/github.com/issmirnov/zap)
