@@ -55,7 +55,8 @@ If you want to actually install this properly, read on.
 Zap takes several command line flags:
 
 - `-config` - path to config file. Default is `./c.yml`
-- `-port` - port to bind to. Use either 80 or 8927
+- `-port` - port to bind to. Default is 8927. Use 80 in standalone mode.
+- `-host` - default is 127.0.0.1. Use 0.0.0.0 for a public server.
 
 #### OSX (brew)
 
@@ -127,7 +128,9 @@ A short list of upcoming features and fixes, sorted by deadline.
 - Systemd service script + ubuntu install instructions.
 - configurable index page. so 'start' or 'index.html', set in top level domain config.
 - queries: so `s/dns` -> `smirnov.wiki/start?do=search&id=dns`
-- coverage and go health report badges
+- coverage and go health re
+
+badges
 - ansible role to facilitate installation
 - add check for dual "expand" keys in config
 
