@@ -9,6 +9,9 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+// TODO: add tests that use erroneous config.
+// Will likely require injecting custom logger and intercepting error msgs.
+
 // See https://elithrar.github.io/article/testing-http-handlers-go/ for comments.
 func TestIndexHandler(t *testing.T) {
 	Convey("Given app is set up with default config", t, func() {

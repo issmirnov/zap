@@ -113,4 +113,28 @@ func TestExpander(t *testing.T) {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foobar")
 		})
 	})
+	Convey("Given 'g/s/foo/bar/baz'", t, func() {
+		c, _ := parseDummyYaml()
+		l := tokenize("g/s/foo/bar/baz")
+		var res bytes.Buffer
+		res.WriteString("https:/")
+
+		expand(c, l.Front(), &res)
+
+		Convey("result should equal 'https://github.com/search?q=foo/bar/baz'", func() {
+			So(res.String(), ShouldEqual, "https://github.com/search?q=foo/bar/baz")
+		})
+	})
+	Convey("Given 'g/s/foo/bar/baz/'", t, func() {
+		c, _ := parseDummyYaml()
+		l := tokenize("g/s/foo/bar/baz/")
+		var res bytes.Buffer
+		res.WriteString("https:/")
+
+		expand(c, l.Front(), &res)
+
+		Convey("result should equal 'https://github.com/search?q=foo/bar/baz/'", func() {
+			So(res.String(), ShouldEqual, "https://github.com/search?q=foo/bar/baz/")
+		})
+	})
 }
