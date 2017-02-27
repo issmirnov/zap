@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"container/list"
-	"errors"
 	"fmt"
 	"strings"
 
@@ -32,21 +31,17 @@ func getPrefix(c *gabs.Container) (string, error) {
 			return fmt.Sprintf("%s", s), nil
 		} else if oki {
 			return fmt.Sprintf("%.f", i), nil
-		} else {
-			return "", errors.New(fmt.Sprintf("Unexpected type of expansion value, got %T instead of int or string.", d))
 		}
+		return "", fmt.Errorf("unexpected type of expansion value, got %T instead of int or string", d)
 	}
 	q := c.Path(queryKey).Data()
 	if q != nil {
 		if s, ok := q.(string); ok {
 			return s, nil
-		} else {
-			return "", errors.New(fmt.Sprintf("Casting query key to string failed for %T:%v", q, q))
 		}
+		return "", fmt.Errorf("Casting query key to string failed for %T:%v", q, q)
 	}
-
-	return "", errors.New(fmt.Sprintf("error in config, no expand or query key in %s\n", c.String()))
-
+	return "", fmt.Errorf("error in config, no expand or query key in %s", c.String())
 }
 func expand(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 	// base case
