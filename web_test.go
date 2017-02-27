@@ -14,7 +14,7 @@ func TestIndexHandler(t *testing.T) {
 	Convey("Given app is set up with default config", t, func() {
 		c, err := parseDummyYaml()
 		So(err, ShouldBeNil)
-		context := &context{config: c, index: "start"}
+		context := &context{config: c}
 		appHandler := &ctxWrapper{context, IndexHandler}
 		handler := http.Handler(appHandler)
 		Convey("When we GET http://g/z", func() {
@@ -38,9 +38,9 @@ func TestIndexHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 			handler.ServeHTTP(rr, req)
 
-			Convey("The result should be a 302 to https://github.com/issmirnov/zap/start", func() {
+			Convey("The result should be a 302 to https://github.com/issmirnov/zap/", func() {
 				So(rr.Code, ShouldEqual, http.StatusFound)
-				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/issmirnov/zap/start")
+				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/issmirnov/zap/")
 			})
 		})
 		Convey("When we GET http://g/z/very/deep/path", func() {
@@ -64,9 +64,9 @@ func TestIndexHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 			handler.ServeHTTP(rr, req)
 
-			Convey("The result should be a 302 to https://github.com/issmirnov/zap/very/deep/path/start", func() {
+			Convey("The result should be a 302 to https://github.com/issmirnov/zap/very/deep/path/", func() {
 				So(rr.Code, ShouldEqual, http.StatusFound)
-				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/issmirnov/zap/very/deep/path/start")
+				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/issmirnov/zap/very/deep/path/")
 			})
 		})
 		Convey("When we GET http://g/", func() {
@@ -77,55 +77,9 @@ func TestIndexHandler(t *testing.T) {
 			rr := httptest.NewRecorder()
 			handler.ServeHTTP(rr, req)
 
-			Convey("The result should be a 302 to https://github.com/start", func() {
+			Convey("The result should be a 302 to https://github.com/", func() {
 				So(rr.Code, ShouldEqual, http.StatusFound)
-				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/start")
-			})
-		})
-	})
-	Convey("Given app is set up with non default config", t, func() {
-		c, err := parseDummyYaml()
-		So(err, ShouldBeNil)
-		context := &context{config: c, index: "otherIndex"}
-		appHandler := &ctxWrapper{context, IndexHandler}
-		handler := http.Handler(appHandler)
-		Convey("When we GET http://g/", func() {
-			req, err := http.NewRequest("GET", "/", nil)
-			So(err, ShouldBeNil)
-			req.Host = "g"
-
-			rr := httptest.NewRecorder()
-			handler.ServeHTTP(rr, req)
-
-			Convey("The result should be a 302 to https://github.com/otherIndex", func() {
-				So(rr.Code, ShouldEqual, http.StatusFound)
-				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/otherIndex")
-			})
-		})
-		Convey("When we GET http://g/z/very/deep/path", func() {
-			req, err := http.NewRequest("GET", "/z/very/deep/path", nil)
-			So(err, ShouldBeNil)
-			req.Host = "g"
-
-			rr := httptest.NewRecorder()
-			handler.ServeHTTP(rr, req)
-
-			Convey("The result should be a 302 to https://github.com/issmirnov/zap/very/deep/path", func() {
-				So(rr.Code, ShouldEqual, http.StatusFound)
-				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/issmirnov/zap/very/deep/path")
-			})
-		})
-		Convey("When we GET http://g/z/very/deep/path/", func() {
-			req, err := http.NewRequest("GET", "/z/very/deep/path/", nil)
-			So(err, ShouldBeNil)
-			req.Host = "g"
-
-			rr := httptest.NewRecorder()
-			handler.ServeHTTP(rr, req)
-
-			Convey("The result should be a 302 to https://github.com/issmirnov/zap/very/deep/path/otherIndex", func() {
-				So(rr.Code, ShouldEqual, http.StatusFound)
-				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/issmirnov/zap/very/deep/path/otherIndex")
+				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/")
 			})
 		})
 	})
