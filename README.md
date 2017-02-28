@@ -1,4 +1,4 @@
-# Zap 
+# Zap
 
 [![Travis](https://travis-ci.org/issmirnov/zap.svg?branch=master)](https://travis-ci.org/issmirnov/zap)
 [![Release](https://img.shields.io/github/release/issmirnov/zap.svg?style=flat-square)](https://github.com/issmirnov/zap/releases/latest)
@@ -38,17 +38,7 @@ mercilessly abuse we still get a respectable ~13k QPS.
 
 ## Installation
 
-### Step 0: Quick Install
-
-If you just want to hack around:
-
-1. `go install github.com/issmirnov/zap`
-2. `tmux new-session -t zap`
-3. `$GOPATH/bin/zap`
-4. `curl -I -L -H 'Host: g' localhost:8927/z` - should return 302 to github.com/issmirnov.zap
-
-If you want to actually install this properly, read on.
-
+If you know how to use ansible, head over to the [ansible galaxy](https://galaxy.ansible.com/issmirnov/zap/) and install this role as `issmirnov.zap`. I've done the heavy lifting for you. If you want to do this by hand, read on.
 
 ### Step 1: Set up Zap to run as a service
 
@@ -87,7 +77,56 @@ location / {
 
 #### Ubuntu
 
-TODO: Provide systemd script, add hints about nginx.
+Note: This section applies to systemd systems only. If you are running ubuntu 14.10 or below, you'll have to use initd.
+
+1. create the zap user: `user....`
+
+2. Make a new file at `/etc/systemd/system/zap.service`
+
+If you are running zap behind a web server, use the following config:
+
+```
+[Unit]
+Description=Zap (URL text expander)
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+User=zap
+Group=zap
+WorkingDirectory=/etc/zap
+ExecStart=/usr/local/bin/zap -port 8927 -config c.yml
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+If you are running standalone:
+```
+[Unit]
+Description=Zap (URL text expander)
+After=syslog.target
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=zap
+WorkingDirectory=/etc/zap
+ExecStart=/usr/local/bin/zap -port 80 -config c.yml
+Restart=always
+RestartSec=2s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+You'll notice the difference is that we have to run as `root` in order to bind to port 80. *If you know of a way to launch a go app under setuid and then drop priveleges, please send a PR*
+
+3. Start your new service: `sudo systemctl start zap` and make sure it's running: `sudo systemctl status zap`
 
 
 ### Step 2: Configure DNS
@@ -98,16 +137,18 @@ For the advanced users, I suggest running `dnsmasqd` and add DNS entries for all
 
 ### Step 3: Tweak the config file and launch the service
 
-The config file is located at `/usr/local/etc/zap/` on OSX, and `/path/tbd` on ubuntu.
+The config file is located at `/usr/local/etc/zap/` on OSX. For ubuntu, you will have to create `/etc/zap/c.yml` by hand.
 
-Open up `c.yml` and update the mappings you would like. You can nest arbitrarily deep. Expansions work on strings and ints.
+Open up `c.yml` and update the mappings you would like. You can nest arbitrarily deep. Expansions work on strings and ints. Notice that we have two keywords available: `expand` and `query`. The `query` term acts almost like the `expand` option, but drops the separating slash between query expansion and search term (`example.com?q=foo` instead of `example.com?q=/foo`)
 
 Important gotcha: yaml has [reserved types](http://yaml.org/type/bool.html) and thus `n`, `y`, `no` and the like need to be quoted. See the sample config.
 
 Once you're done editing the file (making sure to keep the DNS entries in sync) restart the service and test it out.
 
 - OSX: `sudo brew services restart zap` or `brew services restart zap`
-- Ubuntu: `systemctl restart zap`
+- Ubuntu: `sudo systemctl restart zap`
+
+You might have to reload your webserver and `dnsmasq`, depending on your setup.
 
 ## Contributing
 
@@ -125,15 +166,7 @@ Handy commands for local dev:
 
 A short list of upcoming features and fixes, sorted by deadline.
 
-- Systemd service script + ubuntu install instructions.
-- configurable index page. so 'start' or 'index.html', set in top level domain config.
-- queries: so `s/dns` -> `smirnov.wiki/start?do=search&id=dns`
-- coverage and go health re
-
-badges
-- ansible role to facilitate installation
-- add check for dual "expand" keys in config
-
+- better errors - bubble up 500's
 
 ## Contributors
 
