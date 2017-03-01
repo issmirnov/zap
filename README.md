@@ -9,6 +9,8 @@
 
 A simple recursive URL expander.
 
+![zap demo gif](zap_demo.gif)
+
 ## Overview
 
 ZAP is a simple go app that sends 302 redirects. That's it. It was written in just a few hours in between random household tasks. It helps people be more efficient by providing simple shortcuts for common pages.
