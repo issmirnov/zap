@@ -79,7 +79,7 @@ location / {
 
 Note: This section applies to systemd systems only. If you are running ubuntu 14.10 or below, you'll have to use initd.
 
-1. create the zap user: `user....`
+1. create the zap user: `sudo adduser --system --no-create-home --group zap`
 
 2. Make a new file at `/etc/systemd/system/zap.service`
 
