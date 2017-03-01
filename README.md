@@ -50,12 +50,13 @@ Zap takes several command line flags:
 - `-port` - port to bind to. Default is 8927. Use 80 in standalone mode.
 - `-host` - default is 127.0.0.1. Use 0.0.0.0 for a public server.
 
-#### OSX (brew)
+#### OSX: brew install
 
 1. `brew install issmirnov/apps/zap`
 2. `sudo brew services start zap`
+3. Enjoy!
 
-If you already have port 80 in use, you can run zap behind a reverse proxy.
+##### OSX: If you already have port 80 in use, you can run zap behind a reverse proxy.
 
 1. Change the port in the zap plist config: `sed -i '' 's/8927/80/'  /usr/local/Cellar/zap/*/homebrew.mxcl.zap.plist`
 2. Start zap as user service: `brew services start zap`
