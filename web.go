@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -30,7 +31,7 @@ func (cw ctxWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(status), status)
 			// TODO - add bad request?
 		default:
-			http.Error(w, http.StatusText(status), status)
+			http.Error(w, err.Error(), status)
 		}
 	}
 }
@@ -44,21 +45,21 @@ func IndexHandler(a *context, w http.ResponseWriter, r *http.Request) (int, erro
 		host = r.Host
 	}
 
-	// massage the path, appending string to trailing slash if needed
-	// if strings.HasSuffix(r.URL.Path, "/") {
-	// 	r.URL.Path += a.index // TODO make this dependent on TLD
-	// }
+	// Check if host present in config.
+	children, _ := a.config.ChildrenMap()
+	if _, ok := children[host]; !ok {
+		return 404, fmt.Errorf("Shortcut '%s' not found in config.", host)
+	}
 
 	tokens := tokenize(host + r.URL.Path)
-	var res bytes.Buffer
-	res.WriteString("https:/") // second slash appended in expand() call
-	expand(a.config,
-		tokens.Front(), &res)
+	var path bytes.Buffer
+	path.WriteString("https:/") // second slash appended in expand() call
+	expand(a.config, tokens.Front(), &path)
 
 	// send result
-	http.Redirect(w, r, res.String(), http.StatusFound)
+	http.Redirect(w, r, path.String(), http.StatusFound)
 
-	return 302, nil // not really needed?
+	return 302, nil
 }
 
 // HealthHandler responds to /healthz request.

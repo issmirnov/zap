@@ -85,6 +85,18 @@ func TestIndexHandler(t *testing.T) {
 				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/")
 			})
 		})
+		Convey("When we GET http://fake/path", func() {
+			req, err := http.NewRequest("GET", "/path", nil)
+			So(err, ShouldBeNil)
+			req.Host = "fake"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 404", func() {
+				So(rr.Code, ShouldEqual, http.StatusNotFound)
+			})
+		})
 		Convey("When we GET http://g/s/", func() {
 			req, err := http.NewRequest("GET", "/s/", nil)
 			So(err, ShouldBeNil)
