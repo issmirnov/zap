@@ -21,7 +21,7 @@ func tokenize(path string) *list.List {
 	return l
 }
 
-// Returns string to write to result, boolean flag indicating whther to advance
+// Returns string to write to result, boolean flag indicating whether to advance
 // token, and error if needed.
 func getPrefix(c *gabs.Container) (string, bool, error) {
 	d := c.Path(expandKey).Data()
