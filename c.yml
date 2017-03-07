@@ -8,5 +8,7 @@ g:
   expand: github.com
   d:
     expand: issmirnov/dotfiles
+  s:
+    query: search?q=
   z:
     expand: issmirnov/zap

@@ -61,6 +61,9 @@ func expand(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 			res.WriteString(p)
 			if skip {
 				token = token.Next()
+				if token == nil {
+					return
+				}
 				res.WriteString(token.Value.(string))
 			}
 			expand(child, token.Next(), res)

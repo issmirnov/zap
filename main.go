@@ -3,12 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 const appName = "zap"
 
+// Used in version printer, set by GoReleaser.
 var version = "develop"
 
 func main() {
@@ -26,13 +30,30 @@ func main() {
 		os.Exit(0)
 	}
 
+	// load config for first time.
 	c, err := parseYaml(*configName)
 	if err != nil {
-		fmt.Printf("error: %s\n", err)
+		log.Printf("Error parsing config file. Please fix syntax: %s\n", err)
 		return
 	}
 	context := &context{config: c}
 
+	// Enable hot reload.
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+
+	// Enable hot reload.
+	cb := makeCallback(context, *configName)
+	go watchChanges(watcher, *configName, cb)
+	err = watcher.Add(".") // BUG: issue if CWD not set properly.
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Set up routes.
 	http.Handle("/", ctxWrapper{context, IndexHandler})
 	http.Handle("/varz", ctxWrapper{context, VarsHandler})
 	http.HandleFunc("/healthz", HealthHandler)
