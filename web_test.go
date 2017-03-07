@@ -97,6 +97,32 @@ func TestIndexHandler(t *testing.T) {
 				So(rr.Code, ShouldEqual, http.StatusNotFound)
 			})
 		})
+		Convey("When we GET http://g/s/", func() {
+			req, err := http.NewRequest("GET", "/s/", nil)
+			So(err, ShouldBeNil)
+			req.Host = "g"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to https://github.com/search?q=", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/search?q=")
+			})
+		})
+		Convey("When we GET http://g/s", func() {
+			req, err := http.NewRequest("GET", "/s", nil)
+			So(err, ShouldBeNil)
+			req.Host = "g"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to https://github.com/search?q=", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/search?q=")
+			})
+		})
 	})
 }
 

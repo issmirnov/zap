@@ -6,13 +6,15 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/Jeffail/gabs"
 )
 
 type context struct {
 	// Json container with path configs
-	config *gabs.Container
+	config    *gabs.Container
+	configMtx sync.Mutex
 }
 
 type ctxWrapper struct {
