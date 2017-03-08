@@ -3,3 +3,6 @@ dist/
 
 # OS
 *.swp
+
+# compiled files
+zap

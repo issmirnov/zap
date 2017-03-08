@@ -5,18 +5,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/Jeffail/gabs"
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
 )
 
-// expandKey is used to get expand mapping
-const expandKey string = "expand"
-
-// queryKey is used to get search prefix
-const queryKey string = "query"
+const (
+	delimStart = "### Zap Shortcuts :start ##\n"
+	delimEnd   = "### Zap Shortcuts :end ##\n"
+	expandKey  = "expand"
+	queryKey   = "query"
+)
 
 // parseYaml takes a file name and returns a gabs config object.
 func parseYaml(fname string) (*gabs.Container, error) {
@@ -42,7 +45,9 @@ func watchChanges(watcher *fsnotify.Watcher, fname string, cb func()) {
 			// will create swap files, and when you write they delete the original and rename the swap file. This is great
 			// for resolving system crashes, but also completely incompatible with inotify and other fswatch implementations.
 			// Thus, we check that the file of interest might be created as well.
-			if (event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Write == fsnotify.Write) && event.Name == fname {
+			updated := event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Write == fsnotify.Write
+			zapconf := filepath.Clean(event.Name) == fname
+			if updated && zapconf {
 				cb()
 			}
 		case e := <-watcher.Errors:
@@ -66,20 +71,20 @@ func updateHosts(c *context) {
 	var replacement bytes.Buffer
 
 	// 2. generate payload.
-	replacement.WriteString("### Zap Shortcuts :start ##\n")
+	replacement.WriteString(delimStart)
 	children, _ := c.config.ChildrenMap()
 	for k := range children {
 		replacement.WriteString(fmt.Sprintf("127.0.0.1 %s\n", k))
 	}
-	replacement.WriteString("### Zap Shortcuts :end ##")
+	replacement.WriteString(delimEnd)
 
-	// 3. run regexp, prepare file content for write.
-	zapBlock := regexp.MustCompile("(###(.*)##)\n(.|\n)*(###(.*)##)")
-	updatedFile := zapBlock.ReplaceAllString(string(data), replacement.String())
-
-	// If no changes, we have no presence yet. Append our data.
-	if updatedFile == string(data) {
-		updatedFile += replacement.String()
+	// 3. Generate new file content
+	var updatedFile string
+	if !strings.Contains(string(data), delimStart) {
+		updatedFile = string(data) + replacement.String()
+	} else {
+		zapBlock := regexp.MustCompile("(###(.*)##)\n(.|\n)*(###(.*)##\n)")
+		updatedFile = zapBlock.ReplaceAllString(string(data), replacement.String())
 	}
 
 	// 4. Attempt write to file.
@@ -87,7 +92,6 @@ func updateHosts(c *context) {
 	if err != nil {
 		log.Printf("Error writing to '%s': %s\n", hostPath, err.Error())
 	}
-
 }
 
 // makeCallback returns a func that that updates global state.

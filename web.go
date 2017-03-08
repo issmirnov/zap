@@ -13,7 +13,9 @@ import (
 
 type context struct {
 	// Json container with path configs
-	config    *gabs.Container
+	config *gabs.Container
+
+	// Enables safe hot reloading of config.
 	configMtx sync.Mutex
 }
 
