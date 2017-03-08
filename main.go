@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -48,7 +49,7 @@ func main() {
 	// Enable hot reload.
 	cb := makeCallback(context, *configName)
 	go watchChanges(watcher, *configName, cb)
-	err = watcher.Add(".") // BUG: issue if CWD not set properly.
+	err = watcher.Add(path.Dir(*configName))
 	if err != nil {
 		log.Fatal(err)
 	}
