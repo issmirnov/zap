@@ -38,6 +38,7 @@ func main() {
 		return
 	}
 	context := &context{config: c}
+	updateHosts(context) // sync changes since last run.
 
 	// Enable hot reload.
 	watcher, err := fsnotify.NewWatcher()
