@@ -9,6 +9,8 @@ import (
 	"path"
 
 	"github.com/fsnotify/fsnotify"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 const appName = "zap"
@@ -17,7 +19,6 @@ const appName = "zap"
 var version = "develop"
 
 func main() {
-
 	var (
 		configName = flag.String("config", "c.yml", "config file")
 		port       = flag.Int("port", 8927, "port to bind to")
@@ -56,11 +57,12 @@ func main() {
 	}
 
 	// Set up routes.
-	http.Handle("/", ctxWrapper{context, IndexHandler})
-	http.Handle("/varz", ctxWrapper{context, VarsHandler})
-	http.HandleFunc("/healthz", HealthHandler)
+	router := httprouter.New()
+	router.Handler("GET", "/", ctxWrapper{context, IndexHandler})
+	router.Handler("GET", "/varz", ctxWrapper{context, VarsHandler})
+	router.HandlerFunc("GET", "/healthz", HealthHandler)
 
 	// TODO check for errors - addr in use, sudo issues, etc.
 	fmt.Printf("Launching %s on %s:%d\n", appName, *host, *port)
-	http.ListenAndServe(fmt.Sprintf("%s:%d", *host, *port), nil)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", *host, *port), router))
 }
