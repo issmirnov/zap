@@ -13,7 +13,7 @@ A simple URL redirector. Allows you to define shortcuts to pages. I find it fast
 
 ## Overview
 
-ZAP is a simple go app that sends 302 redirects. That's it. It was written in just a few hours in between random household tasks. It helps people be more efficient by providing simple shortcuts for common pages.
+ZAP is a simple go app that sends 302 redirects. It's insanely fast, maxing out at over 150k qps. It helps people be more efficient by providing simple shortcuts for common pages.
 
 ## Installation
 
@@ -136,24 +136,47 @@ For the advanced users running zap on a server on an internal network, I suggest
 
 ## Benchmarks
 
+Benchmarked with [wrk2](https://github.com/giltene/wrk2) on Ubuntu 16.04 using an i5 4590 CPU.
 ```
-# Trial 1: localhost
-$ ab -n 10000 -c 100 http://localhost:8927/
-Requests per second:    39888.31 [#/sec] (mean)
-Time per request:       2.507 [ms] (mean)
+# Maxing out QPS.
+$ wrk -t2 -c10 -d30s -R500000  http://127.0.0.1:8989/h
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     3.40s     1.96s    6.79s    57.82%
+    Req/Sec    80.22k   320.00    80.57k    50.00%
+Requests/sec: 161077.54
 
-# Trial 2: Hitting server on LAN over gigabit, zap behind nginx proxy
-$ ab -n 10000 -c 100 http://server/z
-Requests per second:    12671.57 [#/sec] (mean)
-Time per request:       7.892 [ms] (mean)
+# Getting max users while longest request under 15ms
+$ ./wrk -t2 -c10 -d20s -R120000 http://127.0.0.1:8989/h
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.15ms    0.93ms  14.38ms   81.79%
+    Req/Sec    63.24k     7.18k  110.89k    76.92%
+Requests/sec: 119932.12
 
-# Go benchmarks
-$ go test -bench=.
-BenchmarkIndexHandler-8   	 1000000	      1679 ns/op
 ```
+As you can see, zap peaks at around ~160k qps, and can sustain ~120k qps with an average response under 15ms.
 
-When we run zap locally we easily hit almost 40k qps. Even when behind an nginx proxy, running on a server that I
-mercilessly abuse we still get a respectable ~13k QPS.
+Note: The config used was:
+
+```
+e:
+  expand: example.com
+  a:
+    expand: apples
+  b:
+    expand: bananas
+g:
+  expand: github.com
+  d:
+    expand: issmirnov/dotfiles
+  s:
+    query: search?q=
+  z:
+    expand: issmirnov/zap
+'127.0.0.1:8989':
+  expand: '127.0.0.1:8989'
+  h:
+    expand: healthz
+```
 
 ## Contributing
 
