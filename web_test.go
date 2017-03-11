@@ -133,8 +133,8 @@ func BenchmarkIndexHandler(b *testing.B) {
 	context := &context{config: c}
 	appHandler := &ctxWrapper{context, IndexHandler}
 	handler := http.Handler(appHandler)
-	req, _ := http.NewRequest("GET", "/p", nil)
-	req.Host = "sd"
+	req, _ := http.NewRequest("GET", "/z", nil)
+	req.Host = "g"
 	rr := httptest.NewRecorder()
 	for n := 0; n < b.N; n++ {
 		handler.ServeHTTP(rr, req)

@@ -51,24 +51,23 @@ func expand(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 	}
 	res.WriteString("/")
 	children, _ := c.ChildrenMap()
-	for key, child := range children {
-		if key == token.Value {
-			p, skip, err := getPrefix(child)
-			if err != nil {
-				fmt.Println(err.Error())
-				return
-			}
-			res.WriteString(p)
-			if skip {
-				token = token.Next()
-				if token == nil {
-					return
-				}
-				res.WriteString(token.Value.(string))
-			}
-			expand(child, token.Next(), res)
+	child, ok := children[token.Value.(string)]
+	if ok {
+		p, skip, err := getPrefix(child)
+		if err != nil {
+			fmt.Println(err.Error())
 			return
 		}
+		res.WriteString(p)
+		if skip {
+			token = token.Next()
+			if token == nil {
+				return
+			}
+			res.WriteString(token.Value.(string))
+		}
+		expand(child, token.Next(), res)
+		return
 	}
 	// handle base case if no keys matched
 	res.WriteString(token.Value.(string))
