@@ -1,6 +1,6 @@
 build:
   main: .
-  binary_name: zap
+  binary: zap
   goos:
     - darwin
     - linux
