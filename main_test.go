@@ -22,7 +22,12 @@ g:
     expand: issmirnov/zap
   s:
     query: "search?q="
-
+z:
+  expand: zero.com
+  ssl_off: yes
+zz:
+  expand: zero.ssl.on.com
+  ssl_off: no
 `
 
 func parseDummyYaml() (*gabs.Container, error) {

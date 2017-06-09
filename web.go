@@ -47,15 +47,23 @@ func IndexHandler(a *context, w http.ResponseWriter, r *http.Request) (int, erro
 		host = r.Host
 	}
 
+	var hostConfig *gabs.Container
+	var ok bool
+
 	// Check if host present in config.
 	children, _ := a.config.ChildrenMap()
-	if _, ok := children[host]; !ok {
+	if hostConfig, ok = children[host]; !ok {
 		return 404, fmt.Errorf("Shortcut '%s' not found in config.", host)
 	}
 
 	tokens := tokenize(host + r.URL.Path)
 	var path bytes.Buffer
-	path.WriteString("https:/") // second slash appended in expand() call
+	if s := hostConfig.Path(sslKey).Data(); s != nil && s.(bool) {
+		path.WriteString("http:/") // second slash appended in expand() call
+	} else {
+		path.WriteString("https:/") // second slash appended in expand() call
+	}
+
 	expand(a.config, tokens.Front(), &path)
 
 	// send result

@@ -19,6 +19,7 @@ const (
 	delimEnd   = "### Zap Shortcuts :end ##\n"
 	expandKey  = "expand"
 	queryKey   = "query"
+	sslKey     = "ssl_off"
 )
 
 // parseYaml takes a file name and returns a gabs config object.
