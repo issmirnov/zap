@@ -62,6 +62,11 @@ func main() {
 	router.Handler("GET", "/varz", ctxWrapper{context, VarsHandler})
 	router.HandlerFunc("GET", "/healthz", HealthHandler)
 
+	// https://github.com/julienschmidt/httprouter is having issues with
+	// wildcard handling. As a result, we have to register index handler
+	// as the fallback. Fix incoming.
+	router.NotFound = ctxWrapper{context, IndexHandler}
+
 	// TODO check for errors - addr in use, sudo issues, etc.
 	fmt.Printf("Launching %s on %s:%d\n", appName, *host, *port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", *host, *port), router))
