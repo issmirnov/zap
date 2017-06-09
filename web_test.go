@@ -123,6 +123,32 @@ func TestIndexHandler(t *testing.T) {
 				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/search?q=")
 			})
 		})
+		Convey("When we GET http://z/ with ssl_off", func() {
+			req, err := http.NewRequest("GET", "/", nil)
+			So(err, ShouldBeNil)
+			req.Host = "z"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to http://zero.com/", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "http://zero.com/")
+			})
+		})
+		Convey("When we GET http://zz/ with ssl_off: no ", func() {
+			req, err := http.NewRequest("GET", "/", nil)
+			So(err, ShouldBeNil)
+			req.Host = "zz"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to https://zero.ssl.on.com", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "https://zero.ssl.on.com/")
+			})
+		})
 	})
 }
 
