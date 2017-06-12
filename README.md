@@ -116,6 +116,8 @@ Zap supports hot reloading, so simply save the file when you are done and test o
 
 For the advanced users: You might have to reload your webserver and `dnsmasq`, depending on your setup.
 
+When you add a new shortcut, you need to indicate to your web browser that it's not a search term. You can do this by typing it in once with just a slash. For example, if you add a shortcut `g/z` -> github.com/issmirnov/zap, if you try `g/z` right away you will get taken to the search page. Instead, try `g/` once, and then `g/z`. This initial step only needs to be taken once per new shortcut.
+
 ### Additional Information
 
 
