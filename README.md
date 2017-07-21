@@ -118,6 +118,30 @@ For the advanced users: You might have to reload your webserver and `dnsmasq`, d
 
 When you add a new shortcut, you need to indicate to your web browser that it's not a search term. You can do this by typing it in once with just a slash. For example, if you add a shortcut `g/z` -> github.com/issmirnov/zap, if you try `g/z` right away you will get taken to the search page. Instead, try `g/` once, and then `g/z`. This initial step only needs to be taken once per new shortcut.
 
+#### Examples
+
+You can configure your `c.yml` file endlessly. Here are some examples to get inspire your creativity:
+
+```
+g:
+  expand: github.com
+  z:
+    expand: github.com/issmirnov/zap
+f:
+  expand: facebook.com
+  php:
+    expand: groups/2204685680/
+r:
+  expand: reddit.com/r
+```
+
+With this config, you can use the following queries:
+
+  - `g/z` -> github.com/issmirnov/zap
+  - `f/zuck` -> facebook.com/zuck
+  - `f/php` -> facebook.com/groups/2204685680/
+  - `r/catsstandingup` -> reddit.com/r/catsstandingup
+
 ### Additional Information
 
 
