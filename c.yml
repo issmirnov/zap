@@ -12,3 +12,5 @@ g:
     query: search?q=
   z:
     expand: issmirnov/zap
+r:
+  expand: reddit.com/r
