@@ -15,6 +15,10 @@ A simple URL redirector. Allows you to define shortcuts to pages. I find it fast
 
 ZAP is a simple go app that sends 302 redirects. It's insanely fast, maxing out at over 150k qps. It helps people be more efficient by providing simple shortcuts for common pages.
 
+It can help save keystores on any level of the URL. In the example above, the user types `gh/z` and zap expands `gh` into `github.com` and `z` into `issmirnov/zap`. There is no limit to how deep you can go. Zap can be useful for shortening common paths. If your or your company has many projects at `company.com/long/and/annoying/path/name_here` zap can turn this into `c/name_here`, or `c/p/name_here` - it's all in your hands. 
+
+Zap runs as an HTTP service, and can live on the standard web ports or behind a proxy. It features hot reloading of the config, super low memory footprint and amazing durability under heavy loads.
+
 ## Installation
 
 ### Ansible
