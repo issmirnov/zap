@@ -146,6 +146,12 @@ With this config, you can use the following queries:
   - `f/php` -> facebook.com/groups/2204685680/
   - `r/catsstandingup` -> reddit.com/r/catsstandingup
 
+### Troubleshooting
+
+- If you zap doesn't appear to be running, try `sudo brew services restart zap`. If you are running the standalone version you need sudo access for port 80.
+- If you are using safari, you will get Google searches instead. If you know of a workaround, please let me know.
+
+
 ### Additional Information
 
 
