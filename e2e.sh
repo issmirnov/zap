@@ -12,7 +12,7 @@ ZAP_PID=$!
 
 # pull results.
 RESP="$(curl -I -L -H 'Host: g' localhost:16000/z 2>/dev/null | head -n 2)"
-
+echo $RESP
 # Check header
 if [[ $RESP != *"HTTP/1.1 302 Found"* ]]; then
     echo "302 status not found"
