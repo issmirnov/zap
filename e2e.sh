@@ -11,23 +11,18 @@ fi
 ZAP_PID=$!
 
 # pull results.
-RESP="$(curl -I -L -H 'Host: g' localhost:16000/z 2>/dev/null | head -n 2)"
+RESP="$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' -H 'Host: g' localhost:16000/z)"
 
-# Check header
-if [[ $RESP != *"HTTP/1.1 302 Found"* ]]; then
-    echo "302 status not found"
+# Check response
+expected="302 https://github.com/issmirnov/zap"
+if [[ $RESP != $expected ]];then
+    echo "Status code or location don't match expectations"
+    echo "expected: $expected"
     echo "got: $RESP"
     kill -9 $ZAP_PID
     exit 2
 fi
 
-# check location
-if [[ $RESP != *"Location: https://github.com/issmirnov/zap"* ]]; then
-    echo "Location is wrong"
-    echo "Got: $RESP"
-    kill -9 $ZAP_PID
-    exit 3
-fi
-
+# cleanup
 kill -9 $ZAP_PID
 echo "End to end test passed."
