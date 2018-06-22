@@ -1,5 +1,5 @@
 #!/bin/bash
-
+PORT=16000
 # sanity check for build env
 if [[ ! -e zap ]]; then
     echo "no zap binary present"
@@ -7,11 +7,14 @@ if [[ ! -e zap ]]; then
 fi
 
 # start zap, fork.
-./zap --port 16000 1>/dev/null 2>/dev/null &
+./zap --port $PORT 1>/dev/null 2>/dev/null &
 ZAP_PID=$!
 
+# wait for port to open
+while ! nc -z localhost $PORT </dev/null 2>/dev/null; do sleep 1; done
+
 # pull results.
-RESP="$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' -H 'Host: g' localhost:16000/z)"
+RESP="$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' -H 'Host: g' localhost:$PORT/z)"
 
 # Check response
 expected="302 https://github.com/issmirnov/zap"
