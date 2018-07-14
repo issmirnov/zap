@@ -24,6 +24,7 @@ func main() {
 		port       = flag.Int("port", 8927, "port to bind to")
 		host       = flag.String("host", "127.0.0.1", "host interface")
 		v          = flag.Bool("v", false, "print version info")
+		validate          = flag.Bool("validate", false, "load config file and check for errors")
 	)
 	flag.Parse()
 
@@ -38,6 +39,17 @@ func main() {
 		log.Printf("Error parsing config file. Please fix syntax: %s\n", err)
 		return
 	}
+
+	// Perform extended validation of config.
+	if *validate {
+		if err := validateConfig(c); err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		fmt.Println("No errors detected.")
+		os.Exit(0)
+	}
+
 	context := &context{config: c}
 	updateHosts(context) // sync changes since last run.
 

@@ -42,7 +42,7 @@ func TestTokenizer(t *testing.T) {
 func TestExpander(t *testing.T) {
 
 	Convey("Given 'g/z'", t, func() {
-		c, _ := parseDummyYaml()
+		c, _ := loadTestYaml()
 		l := tokenize("g/z")
 		var res bytes.Buffer
 		res.WriteString("https:/")
@@ -54,7 +54,7 @@ func TestExpander(t *testing.T) {
 		})
 	})
 	// Convey("Given 'e/n'", t, func() {
-	//     c, _ := parseDummyYaml()
+	//     c, _ := loadTestYaml()
 	//     l := tokenize("e/n ")
 	//     var res bytes.Buffer
 	//     res.WriteString("https:/")
@@ -66,7 +66,7 @@ func TestExpander(t *testing.T) {
 	//     })
 	// })
 	Convey("Given 'g/z/extratext'", t, func() {
-		c, _ := parseDummyYaml()
+		c, _ := loadTestYaml()
 		l := tokenize("g/z/extratext")
 		var res bytes.Buffer
 		res.WriteString("https:/")
@@ -78,7 +78,7 @@ func TestExpander(t *testing.T) {
 		})
 	})
 	Convey("Given 'g/'", t, func() {
-		c, _ := parseDummyYaml()
+		c, _ := loadTestYaml()
 		l := tokenize("g/")
 		var res bytes.Buffer
 		res.WriteString("https:/")
@@ -90,7 +90,7 @@ func TestExpander(t *testing.T) {
 		})
 	})
 	Convey("Given 'g/z/very/deep/path'", t, func() {
-		c, _ := parseDummyYaml()
+		c, _ := loadTestYaml()
 		l := tokenize("g/z/very/deep/path")
 		var res bytes.Buffer
 		res.WriteString("https:/")
@@ -102,7 +102,7 @@ func TestExpander(t *testing.T) {
 		})
 	})
 	Convey("Given 'g/s/foobar'", t, func() {
-		c, _ := parseDummyYaml()
+		c, _ := loadTestYaml()
 		l := tokenize("g/s/foobar")
 		var res bytes.Buffer
 		res.WriteString("https:/")
@@ -114,7 +114,7 @@ func TestExpander(t *testing.T) {
 		})
 	})
 	Convey("Given 'g/s/foo/bar/baz'", t, func() {
-		c, _ := parseDummyYaml()
+		c, _ := loadTestYaml()
 		l := tokenize("g/s/foo/bar/baz")
 		var res bytes.Buffer
 		res.WriteString("https:/")
@@ -126,7 +126,7 @@ func TestExpander(t *testing.T) {
 		})
 	})
 	Convey("Given 'g/s/foo/bar/baz/'", t, func() {
-		c, _ := parseDummyYaml()
+		c, _ := loadTestYaml()
 		l := tokenize("g/s/foo/bar/baz/")
 		var res bytes.Buffer
 		res.WriteString("https:/")
