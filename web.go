@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/pprof"
 	"sync"
 
 	"github.com/Jeffail/gabs"
+	"github.com/julienschmidt/httprouter"
 )
 
 type context struct {
@@ -81,4 +83,18 @@ func VarsHandler(c *context, w http.ResponseWriter, r *http.Request) (int, error
 	w.WriteHeader(http.StatusOK)
 	io.WriteString(w, "Config: "+c.config.String())
 	return 200, nil
+}
+
+// Allows us to use pprof. TODO disable in release builds.
+func handlePprof(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	switch p.ByName("pprof") {
+	case "/cmdline":
+		pprof.Cmdline(w, r)
+	case "/profile":
+		pprof.Profile(w, r)
+	case "/symbol":
+		pprof.Symbol(w, r)
+	default:
+		pprof.Index(w, r)
+	}
 }

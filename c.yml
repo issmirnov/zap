@@ -14,3 +14,5 @@ g:
     expand: issmirnov/zap
 r:
   expand: reddit.com/r
+'127.0.0.1:8080':
+  expand: '127.0.0.0.1:8080'

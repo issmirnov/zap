@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"path"
 
@@ -73,6 +74,7 @@ func main() {
 	router.Handler("GET", "/", ctxWrapper{context, IndexHandler})
 	router.Handler("GET", "/varz", ctxWrapper{context, VarsHandler})
 	router.HandlerFunc("GET", "/healthz", HealthHandler)
+	router.GET("/debug/pprof/*pprof", handlePprof)
 
 	// https://github.com/julienschmidt/httprouter is having issues with
 	// wildcard handling. As a result, we have to register index handler
