@@ -15,7 +15,7 @@ import (
 // See https://elithrar.github.io/article/testing-http-handlers-go/ for comments.
 func TestIndexHandler(t *testing.T) {
 	Convey("Given app is set up with default config", t, func() {
-		c, err := parseDummyYaml()
+		c, err := loadTestYaml()
 		So(err, ShouldBeNil)
 		context := &context{config: c}
 		appHandler := &ctxWrapper{context, IndexHandler}
@@ -155,7 +155,7 @@ func TestIndexHandler(t *testing.T) {
 // BenchmarkIndexHandler tests request processing geed when context is preloaded.
 // Run with go test -run=BenchmarkIndexHandler -bench=. // results: 500000x	2555 ns/op
 func BenchmarkIndexHandler(b *testing.B) {
-	c, _ := parseDummyYaml()
+	c, _ := loadTestYaml()
 	context := &context{config: c}
 	appHandler := &ctxWrapper{context, IndexHandler}
 	handler := http.Handler(appHandler)
@@ -187,7 +187,7 @@ func TestHealthCheckHandler(t *testing.T) {
 
 func TestVarzHandler(t *testing.T) {
 	Convey("Given app is set up with default config", t, func() {
-		c, err := parseDummyYaml()
+		c, err := loadTestYaml()
 		So(err, ShouldBeNil)
 		context := &context{config: c}
 

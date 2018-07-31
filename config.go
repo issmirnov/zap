@@ -12,6 +12,7 @@ import (
 	"github.com/Jeffail/gabs"
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
+	"github.com/hashicorp/go-multierror"
 )
 
 const (
@@ -20,7 +21,11 @@ const (
 	expandKey  = "expand"
 	queryKey   = "query"
 	sslKey     = "ssl_off"
+
 )
+
+// Sentinel value used to indicate set membership.
+var exists = struct{}{}
 
 // parseYaml takes a file name and returns a gabs config object.
 func parseYaml(fname string) (*gabs.Container, error) {
@@ -36,6 +41,51 @@ func parseYaml(fname string) (*gabs.Container, error) {
 	}
 	j, _ := gabs.ParseJSON(d)
 	return j, nil
+}
+
+// validateConfig verifies that there are no unexpected values in the config file.
+// at each level of the config, we should either have a KV for expansions, or a leaf node
+// with the values oneof "expand", "query", "ssl_off" that map to a string.
+func validateConfig(c *gabs.Container) (error) {
+	var errors *multierror.Error
+	children, _ := c.ChildrenMap()
+	seenKeys := make(map[string]struct{})
+	for k,v := range children {
+		// Check if key already seen
+		if _, ok := seenKeys[k]; ok {
+			log.Printf("%s detected again", k)
+			errors = multierror.Append(errors, fmt.Errorf("duplicate key detected %s", k))
+		} else {
+			seenKeys[k] = exists // mark key as seen
+		}
+
+		// Validate all children
+		switch k {
+		case
+			"expand",
+			"query":
+			// check that v is a string, else return error.
+			if _, ok := v.Data().(string); !ok {
+				errors = multierror.Append(errors, fmt.Errorf("expected string value for %T, got: %v", k, v.Data()))
+			}
+		case "ssl_off":
+			// check that v is a boolean, else return error.
+			if _, ok := v.Data().(bool); !ok {
+				errors = multierror.Append(errors, fmt.Errorf("expected bool value for %T, got: %v", k, v.Data()))
+			}
+		default:
+			// Check if we have an unknown string here.
+			if _, ok := v.Data().(string); ok {
+				fmt.Printf("unexpected key %s", k)
+				errors = multierror.Append(errors, fmt.Errorf("unexpected string value under key %s, got: %v", k, v.Data()))
+			}
+			// recurse, collect any errors.
+			if err := validateConfig(v); err != nil {
+				errors = multierror.Append(errors, err)
+			}
+		}
+	}
+	return errors.ErrorOrNil()
 }
 
 func watchChanges(watcher *fsnotify.Watcher, fname string, cb func()) {
@@ -100,7 +150,12 @@ func makeCallback(c *context, configName string) func() {
 	return func() {
 		data, err := parseYaml(configName)
 		if err != nil {
-			log.Printf("Error in new config: %s. Fallback to old config.", err)
+			log.Printf("Error loading new config: %s. Fallback to old config.", err)
+			return
+		}
+		err = validateConfig(data)
+		if err != nil {
+			log.Printf("Error validating new config: %s. Fallback to old config.", err)
 			return
 		}
 

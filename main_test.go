@@ -30,13 +30,16 @@ zz:
   ssl_off: no
 `
 
-func parseDummyYaml() (*gabs.Container, error) {
-	d, jsonErr := yaml.YAMLToJSON([]byte(cYaml))
+func loadTestYaml() (*gabs.Container, error) {
+	return parseYamlString(cYaml)
+}
+
+func parseYamlString(config string) (*gabs.Container, error) {
+	d, jsonErr := yaml.YAMLToJSON([]byte(config))
 	if jsonErr != nil {
 		fmt.Printf("Error encoding input to JSON.\n%s\n", jsonErr.Error())
 		return nil, jsonErr
 	}
 	j, _ := gabs.ParseJSON(d)
 	return j, nil
-
 }
