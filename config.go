@@ -150,7 +150,12 @@ func makeCallback(c *context, configName string) func() {
 	return func() {
 		data, err := parseYaml(configName)
 		if err != nil {
-			log.Printf("Error in new config: %s. Fallback to old config.", err)
+			log.Printf("Error loading new config: %s. Fallback to old config.", err)
+			return
+		}
+		err = validateConfig(data)
+		if err != nil {
+			log.Printf("Error validating new config: %s. Fallback to old config.", err)
 			return
 		}
 
