@@ -24,7 +24,7 @@ func main() {
 		port       = flag.Int("port", 8927, "port to bind to")
 		host       = flag.String("host", "127.0.0.1", "host interface")
 		v          = flag.Bool("v", false, "print version info")
-		validate          = flag.Bool("validate", false, "load config file and check for errors")
+		validate   = flag.Bool("validate", false, "load config file and check for errors")
 	)
 	flag.Parse()
 

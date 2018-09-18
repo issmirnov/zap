@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"sync"
 
@@ -27,10 +26,9 @@ type ctxWrapper struct {
 func (cw ctxWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	status, err := cw.H(cw.context, w, r) // this runs the actual handler, defined in struct.
 	if err != nil {
-		log.Printf("HTTP %d: %q", status, err)
 		switch status {
 		case http.StatusInternalServerError:
-			http.Error(w, http.StatusText(status), status)
+			http.Error(w, fmt.Sprintf("HTTP %d: %q", status, err), status)
 			// TODO - add bad request?
 		default:
 			http.Error(w, err.Error(), status)
@@ -59,12 +57,12 @@ func IndexHandler(a *context, w http.ResponseWriter, r *http.Request) (int, erro
 	tokens := tokenize(host + r.URL.Path)
 	var path bytes.Buffer
 	if s := hostConfig.Path(sslKey).Data(); s != nil && s.(bool) {
-		path.WriteString("http:/") // second slash appended in expand() call
+		path.WriteString(httpPrefix)
 	} else {
-		path.WriteString("https:/") // second slash appended in expand() call
+		path.WriteString(httpsPrefix)
 	}
 
-	expand(a.config, tokens.Front(), &path)
+	expandPath(a.config, tokens.Front(), &path)
 
 	// send result
 	http.Redirect(w, r, path.String(), http.StatusFound)

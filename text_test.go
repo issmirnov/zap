@@ -45,9 +45,9 @@ func TestExpander(t *testing.T) {
 		c, _ := loadTestYaml()
 		l := tokenize("g/z")
 		var res bytes.Buffer
-		res.WriteString("https:/")
+		res.WriteString(httpsPrefix)
 
-		expand(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/issmirnov/zap'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap")
@@ -57,9 +57,9 @@ func TestExpander(t *testing.T) {
 	//     c, _ := loadTestYaml()
 	//     l := tokenize("e/n ")
 	//     var res bytes.Buffer
-	//     res.WriteString("https:/")
+	//     res.WriteString(httpsPrefix)
 	//
-	//     expand(c, l.Front(), &res)
+	//     expandPath(c, l.Front(), &res)
 	//
 	//     Convey("result should equal 'https://example.com/999'", func() {
 	//         So(res.String(), ShouldEqual, "https://example.com/999")
@@ -69,9 +69,9 @@ func TestExpander(t *testing.T) {
 		c, _ := loadTestYaml()
 		l := tokenize("g/z/extratext")
 		var res bytes.Buffer
-		res.WriteString("https:/")
+		res.WriteString(httpsPrefix)
 
-		expand(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/issmirnov/zap/extratext'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap/extratext")
@@ -81,9 +81,9 @@ func TestExpander(t *testing.T) {
 		c, _ := loadTestYaml()
 		l := tokenize("g/")
 		var res bytes.Buffer
-		res.WriteString("https:/")
+		res.WriteString(httpsPrefix)
 
-		expand(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/")
@@ -93,9 +93,9 @@ func TestExpander(t *testing.T) {
 		c, _ := loadTestYaml()
 		l := tokenize("g/z/very/deep/path")
 		var res bytes.Buffer
-		res.WriteString("https:/")
+		res.WriteString(httpsPrefix)
 
-		expand(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/issmirnov/zap/very/deep/path'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap/very/deep/path")
@@ -105,9 +105,9 @@ func TestExpander(t *testing.T) {
 		c, _ := loadTestYaml()
 		l := tokenize("g/s/foobar")
 		var res bytes.Buffer
-		res.WriteString("https:/")
+		res.WriteString(httpsPrefix)
 
-		expand(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/search?q=foobar'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foobar")
@@ -117,9 +117,9 @@ func TestExpander(t *testing.T) {
 		c, _ := loadTestYaml()
 		l := tokenize("g/s/foo/bar/baz")
 		var res bytes.Buffer
-		res.WriteString("https:/")
+		res.WriteString(httpsPrefix)
 
-		expand(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/search?q=foo/bar/baz'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foo/bar/baz")
@@ -129,9 +129,9 @@ func TestExpander(t *testing.T) {
 		c, _ := loadTestYaml()
 		l := tokenize("g/s/foo/bar/baz/")
 		var res bytes.Buffer
-		res.WriteString("https:/")
+		res.WriteString(httpsPrefix)
 
-		expand(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/search?q=foo/bar/baz/'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foo/bar/baz/")

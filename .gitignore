@@ -6,3 +6,6 @@ dist/
 
 # compiled files
 zap
+
+# Goland
+.idea/*

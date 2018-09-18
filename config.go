@@ -16,11 +16,14 @@ import (
 )
 
 const (
-	delimStart = "### Zap Shortcuts :start ##\n"
-	delimEnd   = "### Zap Shortcuts :end ##\n"
-	expandKey  = "expand"
-	queryKey   = "query"
-	sslKey     = "ssl_off"
+	delimStart  = "### Zap Shortcuts :start ##\n"
+	delimEnd    = "### Zap Shortcuts :end ##\n"
+	expandKey   = "expand"
+	queryKey    = "query"
+	portKey     = "port"
+	sslKey      = "ssl_off"
+	httpsPrefix = "https:/" // second slash appended in expandPath() call
+	httpPrefix  = "http:/"  // second slash appended in expandPath() call
 
 )
 
@@ -46,11 +49,11 @@ func parseYaml(fname string) (*gabs.Container, error) {
 // validateConfig verifies that there are no unexpected values in the config file.
 // at each level of the config, we should either have a KV for expansions, or a leaf node
 // with the values oneof "expand", "query", "ssl_off" that map to a string.
-func validateConfig(c *gabs.Container) (error) {
+func validateConfig(c *gabs.Container) error {
 	var errors *multierror.Error
 	children, _ := c.ChildrenMap()
 	seenKeys := make(map[string]struct{})
-	for k,v := range children {
+	for k, v := range children {
 		// Check if key already seen
 		if _, ok := seenKeys[k]; ok {
 			log.Printf("%s detected again", k)
@@ -68,6 +71,11 @@ func validateConfig(c *gabs.Container) (error) {
 			if _, ok := v.Data().(string); !ok {
 				errors = multierror.Append(errors, fmt.Errorf("expected string value for %T, got: %v", k, v.Data()))
 			}
+		case "port":
+			// check that v is a float64, else return error.
+			if _, ok := v.Data().(float64); !ok {
+				errors = multierror.Append(errors, fmt.Errorf("expected float64 value for %T, got: %v", k, v.Data()))
+			}
 		case "ssl_off":
 			// check that v is a boolean, else return error.
 			if _, ok := v.Data().(bool); !ok {
@@ -76,7 +84,6 @@ func validateConfig(c *gabs.Container) (error) {
 		default:
 			// Check if we have an unknown string here.
 			if _, ok := v.Data().(string); ok {
-				fmt.Printf("unexpected key %s", k)
 				errors = multierror.Append(errors, fmt.Errorf("unexpected string value under key %s, got: %v", k, v.Data()))
 			}
 			// recurse, collect any errors.

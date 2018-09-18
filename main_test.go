@@ -28,6 +28,13 @@ z:
 zz:
   expand: zero.ssl.on.com
   ssl_off: no
+l:
+  expand: localhost
+  ssl_off: yes
+  a:
+    port: 8080
+    s:
+      expand: service
 `
 
 func loadTestYaml() (*gabs.Container, error) {

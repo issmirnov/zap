@@ -110,6 +110,19 @@ func TestIndexHandler(t *testing.T) {
 				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/search?q=")
 			})
 		})
+		Convey("When we GET http://g/s/foo", func() {
+			req, err := http.NewRequest("GET", "/s/foo", nil)
+			So(err, ShouldBeNil)
+			req.Host = "g"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to https://github.com/search?q=foo", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/search?q=foo")
+			})
+		})
 		Convey("When we GET http://g/s", func() {
 			req, err := http.NewRequest("GET", "/s", nil)
 			So(err, ShouldBeNil)
@@ -149,6 +162,61 @@ func TestIndexHandler(t *testing.T) {
 				So(rr.Header().Get("Location"), ShouldEqual, "https://zero.ssl.on.com/")
 			})
 		})
+
+		Convey("When we GET http://l/a with ssl_off ", func() {
+			req, err := http.NewRequest("GET", "/a", nil)
+			So(err, ShouldBeNil)
+			req.Host = "l"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to http://localhost:8080", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "http://localhost:8080")
+			})
+		})
+
+		Convey("When we GET http://l/a/ with ssl_off ", func() {
+			req, err := http.NewRequest("GET", "/a/", nil)
+			So(err, ShouldBeNil)
+			req.Host = "l"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to http://localhost:8080/", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "http://localhost:8080/")
+			})
+		})
+		Convey("When we GET http://l/a/s with ssl_off", func() {
+			req, err := http.NewRequest("GET", "/a/s", nil)
+			So(err, ShouldBeNil)
+			req.Host = "l"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to http://localhost:8080/service", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "http://localhost:8080/service")
+			})
+		})
+		Convey("When we GET http://l/a/s/ with ssl_off", func() {
+			req, err := http.NewRequest("GET", "/a/s/", nil)
+			So(err, ShouldBeNil)
+			req.Host = "l"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to http://localhost:8080/service/", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "http://localhost:8080/service/")
+			})
+		})
+
 	})
 }
 
