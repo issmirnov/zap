@@ -5,6 +5,7 @@ build:
     - darwin
     - linux
 archive:
+  name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
   replacements:
     amd64: 64-bit
     386: 32-bit
