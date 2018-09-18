@@ -7,7 +7,7 @@ Handy commands for local development:
 
 - `go run main.go config.go text.go web.go` to run locally
 - `curl -I -L -H 'Host: g' localhost:8927/z` - to test locally e2e
-- `goconvey` - launches web UI for go tests.
+- `goconvey -excludedDirs dist` - launches web UI for go tests.
 - `go test` runs CLI tests.
 
 

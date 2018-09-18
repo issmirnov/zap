@@ -6,29 +6,6 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-const okYAML = `
-e:
-  expand: example.com
-  a:
-    expand: apples
-  b:
-    expand: bananas
-g:
-  expand: github.com
-  d:
-    expand: issmirnov/dotfiles
-  z:
-    expand: issmirnov/zap
-  s:
-    query: "search?q="
-z:
-  expand: zero.com
-  ssl_off: yes
-zz:
-  expand: zero.ssl.on.com
-  ssl_off: no
-`
-
 const duplicatedYAML = `
 e:
   expand: example.com
@@ -65,10 +42,9 @@ g:
     expand: issmirnov/dotfiles
 `
 
-
 func TestValidateConfig(t *testing.T) {
 	Convey("Given a correctly formatted yaml config", t, func() {
-		conf, _ := parseYamlString(okYAML)
+		conf, _ := parseYamlString(cYaml)
 		//fmt.Printf(err.Error())
 		Convey("The validator should pass", func() {
 			So(validateConfig(conf), ShouldBeNil)
