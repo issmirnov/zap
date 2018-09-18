@@ -1,9 +1,12 @@
+# https://github.com/goreleaser/goreleaser/blob/master/.goreleaser.yml
 build:
   main: .
   binary: zap
   goos:
     - darwin
     - linux
+checksum:
+  name_template: '{{ .ProjectName }}_checksums.txt'
 archive:
   name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
   replacements:
