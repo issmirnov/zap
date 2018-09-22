@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Jeffail/gabs"
 	"encoding/json"
+	"github.com/Jeffail/gabs"
 )
 
 type context struct {
