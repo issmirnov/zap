@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/Jeffail/gabs"
+	"encoding/json"
 )
 
 type context struct {
@@ -79,6 +80,17 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 // VarsHandler responds to /varz request and prints config.
 func VarsHandler(c *context, w http.ResponseWriter, r *http.Request) (int, error) {
 	w.WriteHeader(http.StatusOK)
-	io.WriteString(w, "Config: "+c.config.String())
+	io.WriteString(w, jsonPrettyPrint(c.config.String()))
 	return 200, nil
+}
+
+// https://stackoverflow.com/a/36544455/5117259
+func jsonPrettyPrint(in string) string {
+	var out bytes.Buffer
+	err := json.Indent(&out, []byte(in), "", "\t")
+	if err != nil {
+		return in
+	}
+	out.WriteString("\n")
+	return out.String()
 }
