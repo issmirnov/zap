@@ -7,15 +7,15 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/issmirnov/zap?style=flat-square)](https://goreportcard.com/report/github.com/issmirnov/zap)
 [![Powered By: GoReleaser](https://img.shields.io/badge/powered%20by-goreleaser-green.svg?style=flat-square)](https://github.com/goreleaser)
 
-A simple URL redirector. Allows you to define shortcuts to pages. I find it faster than traditional bookmarks.
+Zap is a powerful tool that allows you to define universal web shortcuts in a simple config file. Faster than bookmarks, and works in any app!
 
 ![zap demo gif](zap_demo.gif)
 
 ## Overview
 
-ZAP is a simple go app that sends 302 redirects. It's insanely fast, maxing out at over 150k qps. It helps people be more efficient by providing simple shortcuts for common pages.
+ZAP is fast golang app that sends 302 redirects. It's insanely fast, maxing out at over 150k qps. It helps people be more efficient by providing simple shortcuts for common pages.
 
-It can help save keystores on any level of the URL. In the example above, the user types `gh/z` and zap expands `gh` into `github.com` and `z` into `issmirnov/zap`. There is no limit to how deep you can go. Zap can be useful for shortening common paths. If your or your company has many projects at `company.com/long/and/annoying/path/name_here` zap can turn this into `c/name_here`, or `c/p/name_here` - it's all in your hands. 
+It can help save keystrokes on any level of the URL. In the example above, the user types `gh/z` and zap expands `gh` into `github.com` and `z` into `issmirnov/zap`. There is no limit to how deep you can go. Zap can be useful for shortening common paths. If your or your company has many projects at `company.com/long/and/annoying/path/name_here` zap can turn this into `c/name_here`, or `c/p/name_here` - it's all in your hands.
 
 Zap runs as an HTTP service, and can live on the standard web ports or behind a proxy. It features hot reloading of the config, super low memory footprint and amazing durability under heavy loads.
 
@@ -36,13 +36,13 @@ If you already have port 80 in use, you can run zap behind a reverse proxy.
 
 1. Change the port in the zap plist config: `sed -i '' 's/8927/80/'  /usr/local/Cellar/zap/*/homebrew.mxcl.zap.plist`
 2. Start zap as user service: `brew services start zap`
-3. Configure your web server to act as a reverse proxy. For nginx, this will suffice:
+3. Configure your web server to act as a reverse proxy. Here's an example for nginx:
 
 ```
 # File: /usr/local/etc/nginx/servers/zap.conf
 server {
     listen 80; # Keep as 80, make sure nginx listens on 80 too
-    server_name e g; # Put your shortcuts here
+    server_name e g; # Put all of your top level shortcuts here - so just the first children in the config.
 location / {
         proxy_http_version 1.1;
         proxy_pass http://localhost:8927;
@@ -52,17 +52,15 @@ location / {
 }
 ```
 
-Restart your webserver and test the result: `curl -I -L -H 'Host: g' localhost/z`
-
-
+Restart your web server and test the result: `curl -I -L -H 'Host: g' localhost/z`
 
 ### Ubuntu
 
-Note: This section applies to systemd systems only. If you are running ubuntu 14.10 or below, you'll have to use [upstart](https://www.digitalocean.com/community/tutorials/the-upstart-event-system-what-it-is-and-how-to-use-it).
+Note: This section applies to systemd installations only (Ubuntu, Redhat, Fedora). If you are running ubuntu 14.10 or below, you'll have to use [upstart](https://www.digitalocean.com/community/tutorials/the-upstart-event-system-what-it-is-and-how-to-use-it).
 
-1. create the zap user: `sudo adduser --system --no-create-home --group zap`
+1. Add the zap user: `sudo adduser --system --no-create-home --group zap`
 
-2. Make a service definition at `/etc/systemd/system/zap.service`. If you are running zap behind a web server, use the following config:
+2. Create the service definition at `/etc/systemd/system/zap.service`. If you are running zap behind a web server, use the following config:
 
 ```
 [Unit]
@@ -112,31 +110,55 @@ You'll notice the difference is that we have to run as `root` in order to bind t
 
 The config file is located at `/usr/local/etc/zap/c.yml` on OSX. For ubuntu, you will have to create `/etc/zap/c.yml` by hand.
 
-Open up `c.yml` and update the mappings you would like. You can nest arbitrarily deep. Expansions work on strings and ints. Notice that we have two keywords available: `expand` and `query`. The `query` term acts almost like the `expand` option, but drops the separating slash between query expansion and search term (`example.com?q=foo` instead of `example.com?q=/foo`)
+Open up `c.yml` and update the mappings you would like. You can nest arbitrarily deep. Expansions work on strings and ints. Notice that we have three keywords available: `expand`, `query`, and `port`.
+
+- `expand` - takes a short token and expands it to the specified string. Turns `z` into `zap/`,
+- `query` - acts almost like the `expand` option, but drops the separating slash between query expansion and search term (`example.com?q=foo` instead of `example.com?q=/foo`).
+- `port` - only valid as the first child under a host. Takes an int and appends it as `:$INT` to the host defined. See the usage in the [sample config](c.yml)
 
 Important gotcha: yaml has [reserved types](http://yaml.org/type/bool.html) and thus `n`, `y`, `no` and the like need to be quoted. See the sample config.
 
-Zap supports hot reloading, so simply save the file when you are done and test out your new shortcut. Note: If the shortcut does not work, make sure your YAML is correct and that zap is not printing any errors. You can test this by stopping zap and starting it manually - it should print any issues to stdout.
+When you add a new shortcut, you need to indicate to your web browser that it's not a search term. You can do this by typing it in once with just a slash. For example, if you add a shortcut `g/z` -> `github.com/issmirnov/zap`, if you try `g/z` right away you will get taken to the search page. Instead, try `g/` once, and then `g/z`. This initial step only needs to be taken once per new shortcut.
 
-For the advanced users: You might have to reload your webserver and `dnsmasq`, depending on your setup.
+Zap supports hot reloading, so simply save the file when you are done and test out your new shortcut. Note: If the shortcut does not work, make sure your YAML is correct and that zap is not printing any errors. You can test this by stopping zap and starting it manually - it should print any issues to stdout. You can also view the parsed config with `curl localhost:$ZAP_PORT/varz` - this will print the JSON representation of the config. If you see unexpected values, check your [YAML syntax](https://learnxinyminutes.com/docs/yaml/).
 
-When you add a new shortcut, you need to indicate to your web browser that it's not a search term. You can do this by typing it in once with just a slash. For example, if you add a shortcut `g/z` -> github.com/issmirnov/zap, if you try `g/z` right away you will get taken to the search page. Instead, try `g/` once, and then `g/z`. This initial step only needs to be taken once per new shortcut.
+For the advanced users: remember to reload your webserver and `dnsmasq`, depending on your setup.
 
 #### Examples
 
 You can configure your `c.yml` file endlessly. Here are some examples to get inspire your creativity:
 
 ```
-g:
-  expand: github.com
-  z:
-    expand: github.com/issmirnov/zap
+e:
+  expand: example.com
+  ssl_off: yes
 f:
   expand: facebook.com
+  g:
+    expand: groups
+    s:
+      expand: BerkeleyFreeAndForSale
+    p:
+      expand: "2204685680"
   php:
     expand: groups/2204685680/
+g:
+  expand: github.com
+  d:
+    expand: issmirnov/dotfiles
+  s:
+    query: search?q=
+  z:
+    expand: issmirnov/zap
 r:
   expand: reddit.com/r
+l:
+  expand: localhost
+  ssl_off: yes
+  p:
+    port: 8080
+  "n":
+    port: 9001
 ```
 
 With this config, you can use the following queries:
@@ -149,8 +171,7 @@ With this config, you can use the following queries:
 ### Troubleshooting
 
 - If you zap doesn't appear to be running, try `sudo brew services restart zap`. If you are running the standalone version you need sudo access for port 80.
-- If you are using safari, you will get Google searches instead. If you know of a workaround, please let me know.
-
+- If you are using Safari, you will get Google searches instead. If you know of a workaround, please let me know.
 
 ### Additional Information
 

@@ -1,9 +1,16 @@
+# Configuration file for https://github.com/issmirnov/zap
+#
+# NOTE: YAML has special keywords that do funky things.
+#       When in doubt, use quotes on strings.
 e:
   expand: example.com
-  a:
-    expand: apples
-  b:
-    expand: bananas
+  ssl_off: yes
+f:
+  expand: facebook.com
+  g:
+    expand: groups
+    s:
+      expand: BerkeleyFreeAndForSale
 g:
   expand: github.com
   d:
@@ -14,3 +21,10 @@ g:
     expand: issmirnov/zap
 r:
   expand: reddit.com/r
+l:
+  expand: localhost
+  ssl_off: yes
+  p:
+    port: 8080
+  "n":
+    port: 9001
