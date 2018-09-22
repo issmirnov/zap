@@ -236,12 +236,12 @@ func BenchmarkIndexHandler(b *testing.B) {
 }
 
 func TestHealthCheckHandler(t *testing.T) {
-	Convey("When we GET /zealthz", t, func() {
-		req, err := http.NewRequest("GET", "/zealthz", nil)
+	Convey("When we GET /healthz", t, func() {
+		req, err := http.NewRequest("GET", "/healthz", nil)
 		So(err, ShouldBeNil)
 		req.Host = "sd"
 
-		// We create a RegonseRecorder (which satisfies http.RegonseWriter) to record the regonse.
+		// We create a ResponseWriter (which satisfies http.ResponseWriter) to record the response.
 		rr := httptest.NewRecorder()
 		handler := http.HandlerFunc(HealthHandler)
 		handler.ServeHTTP(rr, req)
@@ -271,11 +271,23 @@ func TestVarzHandler(t *testing.T) {
 
 			Convey("We should get a 200", func() {
 				So(rr.Code, ShouldEqual, http.StatusOK)
+			})
+			Convey("It should be valid json", func() {
+				_, err := yaml.YAMLToJSON(rr.Body.Bytes())
+				So(err, ShouldBeNil)
+			})
+			Convey("It should equal the config file", func() {
 				conf, err := yaml.YAMLToJSON(c.Bytes())
-				So(err, ShouldBeNil)
-				d, err := yaml.YAMLToJSON(rr.Body.Bytes())
-				So(err, ShouldBeNil)
-				So(string(d), ShouldContainSubstring, string(conf))
+				So(err, ShouldBeNil) // sanity check.
+
+				resp, err := yaml.YAMLToJSON(rr.Body.Bytes())
+				So(err, ShouldBeNil) // sanity check.
+
+				// We get a nicely formatted response, but when we feed it into YAMLToJSON it collapses our nice
+				// newlines. As a result, directly comparing the byte arrays here is a nogo. Therefore, we cheat
+				// and utilize the separately tested jsonPrettyPrint to idempotently indent the JSON and compare that.
+				// This does not work: "So(resp, ShouldEqual, []byte(jsonPrettyPrint(string(conf))))"
+				So(jsonPrettyPrint(string(resp)), ShouldEqual, jsonPrettyPrint(string(conf)))
 			})
 		})
 	})
