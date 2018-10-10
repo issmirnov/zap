@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/spf13/afero"
 )
 
 const duplicatedYAML = `
@@ -41,6 +42,20 @@ g:
   d:
     expand: issmirnov/dotfiles
 `
+
+func TestParseYaml(t *testing.T) {
+	Convey("Given a valid 'c.yml' file", t, func() {
+		Afero = &afero.Afero{Fs: afero.NewMemMapFs()}
+		Afero.WriteFile("c.yml", []byte(cYaml), 0644)
+		c, err := parseYaml("c.yml")
+		Convey("parseYaml should throw no error", func() {
+			So(err, ShouldBeNil)
+		})
+		Convey("the gabs object should have path 'zz' present", func() {
+			So(c.ExistsP("zz"), ShouldBeTrue)
+		})
+	})
+}
 
 func TestValidateConfig(t *testing.T) {
 	Convey("Given a correctly formatted yaml config", t, func() {

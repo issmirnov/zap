@@ -13,6 +13,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
 	"github.com/hashicorp/go-multierror"
+	"github.com/spf13/afero"
 )
 
 const (
@@ -30,9 +31,12 @@ const (
 // Sentinel value used to indicate set membership.
 var exists = struct{}{}
 
+// Filesystem wrapper.
+var Afero = &afero.Afero{Fs: afero.NewOsFs()}
+
 // parseYaml takes a file name and returns a gabs config object.
 func parseYaml(fname string) (*gabs.Container, error) {
-	data, err := ioutil.ReadFile(fname)
+	data, err := Afero.ReadFile(fname)
 	if err != nil {
 		fmt.Printf("Unable to read file: %s\n", err.Error())
 		return nil, err
