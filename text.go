@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	EXPAND = iota
-	QUERY
-	PORT
+	expand = iota
+	query
+	port
 )
 
 // tokenize takes a string delimited by slashes and splits it up into tokens
@@ -36,16 +36,16 @@ func getPrefix(c *gabs.Container) (string, int, error) {
 		s, oks := d.(string)
 		i, oki := d.(float64)
 		if oks {
-			return s, EXPAND, nil
+			return s, expand, nil
 		} else if oki {
-			return fmt.Sprintf("%.f", i), EXPAND, nil
+			return fmt.Sprintf("%.f", i), expand, nil
 		}
 		return "", 0, fmt.Errorf("unexpected type of expansion value, got %T instead of int or string", d)
 	}
 	q := c.Path(queryKey).Data()
 	if q != nil {
 		if s, ok := q.(string); ok {
-			return s, QUERY, nil
+			return s, query, nil
 		}
 		return "", 0, fmt.Errorf("casting query key to string failed for %T:%v", q, q)
 	}
@@ -53,7 +53,7 @@ func getPrefix(c *gabs.Container) (string, int, error) {
 	p := c.Path(portKey).Data()
 	if p != nil {
 		if s, ok := p.(float64); ok {
-			return fmt.Sprintf(":%.f", s), PORT, nil
+			return fmt.Sprintf(":%.f", s), port, nil
 		}
 		return "", 0, fmt.Errorf("casting port key to float64 failed for %T:%v", p, p)
 	}
@@ -79,11 +79,11 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 		}
 
 		switch action {
-		case EXPAND: // Generic case, write slash followed by expanded token.
+		case expand: // Generic case, write slash followed by expanded token.
 			res.WriteString("/")
 			res.WriteString(p)
 
-		case QUERY: // Write a slash + query string expansion, then perform token skipahead in order to have correct slashes.
+		case query: // Write a slash + query string expansion, then perform token skipahead in order to have correct slashes.
 			res.WriteString("/")
 			res.WriteString(p)
 			if token.Next() != nil {
@@ -91,7 +91,7 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 				token = token.Next()
 			}
 
-		case PORT: // A little bit of a special case - unlike "EXPAND", we don't want a leading slash.
+		case port: // A little bit of a special case - unlike "expand", we don't want a leading slash.
 			res.WriteString(p)
 
 		default:
