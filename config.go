@@ -31,7 +31,8 @@ const (
 // Sentinel value used to indicate set membership.
 var exists = struct{}{}
 
-// Filesystem wrapper.
+// Afero is a filesystem wrapper providing util methods
+// and easy test mocks.
 var Afero = &afero.Afero{Fs: afero.NewOsFs()}
 
 // parseYaml takes a file name and returns a gabs config object.
