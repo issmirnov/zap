@@ -43,6 +43,18 @@ g:
     expand: issmirnov/dotfiles
 `
 
+const badValuesYAML = `
+e:
+  expand: 2
+  s:
+    query: 3
+g:
+  expand: github.com
+  ssl_off: "not_bool"
+l:
+  port: "not_int"
+`
+
 func TestParseYaml(t *testing.T) {
 	Convey("Given a valid 'c.yml' file", t, func() {
 		Afero = &afero.Afero{Fs: afero.NewMemMapFs()}
@@ -79,6 +91,18 @@ func TestValidateConfig(t *testing.T) {
 		conf, _ := parseYamlString(badkeysYAML)
 		Convey("The validator should raise an error", func() {
 			So(validateConfig(conf), ShouldNotBeNil)
+		})
+	})
+
+	Convey("Given a YAML config with malformed values", t, func() {
+		conf, _ := parseYamlString(badValuesYAML)
+		err := validateConfig(conf)
+		Convey("The validator should raise a ton of errors", func() {
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldContainSubstring, "expected float64 value for string, got: not_int")
+			So(err.Error(), ShouldContainSubstring, "expected string value for string, got: 3")
+			So(err.Error(), ShouldContainSubstring, "expected bool value for string, got: not_bool")
+			So(err.Error(), ShouldContainSubstring, "expected string value for string, got: 2")
 		})
 	})
 }
