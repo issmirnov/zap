@@ -9,3 +9,6 @@ zap
 
 # Goland
 .idea/*
+
+# coverage reports
+coverage.txt
