@@ -46,6 +46,19 @@ func TestIndexHandler(t *testing.T) {
 				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/issmirnov/zap/")
 			})
 		})
+		Convey("When we GET http://g/z/ with 'X-Forwarded-Host' set", func() {
+			req, err := http.NewRequest("GET", "/z/", nil)
+			So(err, ShouldBeNil)
+			req.Header = map[string][]string{"X-Forwarded-Host": {"g"}}
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			Convey("The result should be a 302 to https://github.com/issmirnov/zap/", func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, "https://github.com/issmirnov/zap/")
+			})
+		})
 		Convey("When we GET http://g/z/very/deep/path", func() {
 			req, err := http.NewRequest("GET", "/z/very/deep/path", nil)
 			So(err, ShouldBeNil)
