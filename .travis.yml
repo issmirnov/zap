@@ -36,7 +36,7 @@ git:
 script:
   - diff -u <(echo -n) <(gofmt -d .)
   - go vet $(go list ./... | grep -v /vendor/)
-  - go test -short -v ./...
+  - go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic
   - go build -v ./...
   - ./e2e.sh
 
@@ -49,3 +49,7 @@ deploy:
   on:
     tags: true
     condition: $TRAVIS_OS_NAME = linux && $LATEST = true
+
+# upload coverage reports
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
