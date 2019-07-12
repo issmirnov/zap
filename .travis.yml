@@ -3,39 +3,42 @@
 #  - https://goreleaser.com/ci/
 
 language: go
+install: true # https://arslan.io/2018/08/26/using-go-modules-with-vendor-support-on-travis-ci/
 sudo: false
+
+# Only clone the most recent commit.
+git:
+  depth: 1
 
 matrix:
   include:
     # "1.x" always refers to the latest Go version, inc. the patch release.
     # e.g. "1.x" is 1.11 until 1.11.1 is available.
     - go: 1.x
-      env: LATEST=true
-    - go: 1.7.x
-    - go: 1.8.x
-    - go: 1.9.x
-    - go: 1.10.x
+      env:
+        - LATEST=true
+        - GO111MODULE=on
     - go: 1.11.x
+    - go: 1.12.x
     - go: tip
   allow_failures:
     - go: tip
+
+env:
+  - GO111MODULE=on
 
 # https://docs.travis-ci.com/user/reference/overview/#virtualisation-environment-vs-operating-system
 os:
   - linux
   - osx
-  
-install:
-  - go get -t -v ./...
 
-# Only clone the most recent commit.
-git:
-  depth: 1
+#install:
+#  - go get -v ./...
 
 
 script:
-  - diff -u <(echo -n) <(gofmt -d .)
-  - go vet $(go list ./... | grep -v /vendor/)
+  - diff -u <(echo -n) <(go fmt $(go list ./...))
+  - go vet $(go list ./...)
   - go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic
   - go build -v ./...
   - ./e2e.sh
