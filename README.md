@@ -38,7 +38,7 @@ If you already have port 80 in use, you can run zap behind a reverse proxy.
 2. Start zap as user service: `brew services start zap`
 3. Configure your web server to act as a reverse proxy. Here's an example for nginx:
 
-```
+```nginx
 # File: /usr/local/etc/nginx/servers/zap.conf
 server {
     listen 80; # Keep as 80, make sure nginx listens on 80 too
@@ -62,7 +62,7 @@ Note: This section applies to systemd installations only (Ubuntu, Redhat, Fedora
 
 2. Create the service definition at `/etc/systemd/system/zap.service`. If you are running zap behind a web server, use the following config:
 
-```
+```ini
 [Unit]
 Description=Zap (URL text expander)
 After=syslog.target
@@ -82,7 +82,7 @@ WantedBy=multi-user.target
 ```
 
 If you are running standalone:
-```
+```ini
 [Unit]
 Description=Zap (URL text expander)
 After=syslog.target
@@ -128,7 +128,7 @@ For the advanced users: remember to reload your webserver and `dnsmasq`, dependi
 
 You can configure your `c.yml` file endlessly. Here are some examples to get inspire your creativity:
 
-```
+```yaml
 e:
   expand: example.com
   ssl_off: yes
@@ -194,7 +194,7 @@ For the advanced users running zap on a server on an internal network, I suggest
 ## Benchmarks
 
 Benchmarked with [wrk2](https://github.com/giltene/wrk2) on Ubuntu 16.04 using an i5 4590 CPU.
-```
+```bash
 # Maxing out QPS.
 $ wrk -t2 -c10 -d30s -R500000  http://127.0.0.1:8989/h
   Thread Stats   Avg      Stdev     Max   +/- Stdev
@@ -214,7 +214,7 @@ As you can see, zap peaks at around ~160k qps, and can sustain ~120k qps with an
 
 Note: The config used was:
 
-```
+```yaml
 e:
   expand: example.com
   a:
