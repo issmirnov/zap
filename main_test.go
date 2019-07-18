@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/Jeffail/gabs"
+	"github.com/Jeffail/gabs/v2"
 	"github.com/ghodss/yaml"
 )
 

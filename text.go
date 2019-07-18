@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Jeffail/gabs"
+	"github.com/Jeffail/gabs/v2"
 )
 
 const (
@@ -69,7 +69,7 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 	if token == nil {
 		return
 	}
-	children, _ := c.ChildrenMap()
+	children := c.ChildrenMap()
 	child, ok := children[token.Value.(string)]
 	if ok {
 		p, action, err := getPrefix(child)

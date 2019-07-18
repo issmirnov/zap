@@ -3,7 +3,7 @@ module github.com/issmirnov/zap
 go 1.12
 
 require (
-	github.com/Jeffail/gabs v1.4.0
+	github.com/Jeffail/gabs/v2 v2.0.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/gopherjs/gopherjs v0.0.0-20190430165422-3e4dfb77656c // indirect
