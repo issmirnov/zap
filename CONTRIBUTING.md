@@ -7,21 +7,25 @@ repo and submit a PR. I'll usually get to it within a few days.
 
 - Install [Goland](https://www.jetbrains.com/go/), [Atom](https://atom.io/),
 or your favorite web editor with Golang support.
+- Note: This project relies on Go Modules, introduces in Go 1.11+.
 
 ```
-cd $GOPATH/src/github.com/issmirnov/zap
+git clone $your_fork zap
+cd zap
+go get
 go build . # sanity check
 
-# install test deps
-go get github.com/smartystreets/goconvey
+# install test deps and run all tests
+go test ./... -v 
+./e2e.sh
 ```
 
 ## Handy commands for local development:
 
-- `go run main.go config.go text.go web.go` to run locally
+- `go build && ./zap` to run locally
 - `curl -I -L -H 'Host: g' localhost:8927/z` - to test locally e2e
 - `goconvey -excludedDirs dist` - launches web UI for go tests.
-- `go test` runs CLI tests.
+- `./e2e.sh` runs CLI tests.
 
 
 ## Contributors
