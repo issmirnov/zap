@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Jeffail/gabs"
+	"github.com/Jeffail/gabs/v2"
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
 	"github.com/hashicorp/go-multierror"
@@ -56,7 +56,7 @@ func parseYaml(fname string) (*gabs.Container, error) {
 // with the values oneof "expand", "query", "ssl_off" that map to a string.
 func validateConfig(c *gabs.Container) error {
 	var errors *multierror.Error
-	children, _ := c.ChildrenMap()
+	children := c.ChildrenMap()
 	seenKeys := make(map[string]struct{})
 	for k, v := range children {
 		// Check if key already seen
@@ -135,7 +135,7 @@ func updateHosts(c *context) {
 
 	// 2. generate payload.
 	replacement.WriteString(delimStart)
-	children, _ := c.config.ChildrenMap()
+	children := c.config.ChildrenMap()
 	for k := range children {
 		replacement.WriteString(fmt.Sprintf("127.0.0.1 %s\n", k))
 	}

@@ -8,7 +8,8 @@ import (
 	"sync"
 
 	"encoding/json"
-	"github.com/Jeffail/gabs"
+
+	"github.com/Jeffail/gabs/v2"
 )
 
 type context struct {
@@ -50,7 +51,7 @@ func IndexHandler(a *context, w http.ResponseWriter, r *http.Request) (int, erro
 	var ok bool
 
 	// Check if host present in config.
-	children, _ := a.config.ChildrenMap()
+	children := a.config.ChildrenMap()
 	if hostConfig, ok = children[host]; !ok {
 		return 404, fmt.Errorf("Shortcut '%s' not found in config.", host)
 	}
