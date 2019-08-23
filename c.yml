@@ -2,6 +2,18 @@
 #
 # NOTE: YAML has special keywords that do funky things.
 #       When in doubt, use quotes on strings.
+a:
+  expand: amazon.com
+  c:
+    expand: gp/cart/view.html
+  h:
+    expand: gp/help/customer/contact-us
+  o:
+    expand: gp/css/order-history/
+  s: # a/s/foo will search amazon for "foo"
+    query: s?k=
+c:
+  expand: calendar.google.com
 e:
   expand: example.com
   ssl_off: yes
@@ -28,3 +40,7 @@ l:
     port: 8080
   "n":
     port: 9001
+m:
+  expand: gmail.google.com
+maps:
+  expand: maps.google.com
