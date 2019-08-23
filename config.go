@@ -22,6 +22,7 @@ const (
 	expandKey   = "expand"
 	queryKey    = "query"
 	portKey     = "port"
+	passKey     = "*"
 	sslKey      = "ssl_off"
 	httpsPrefix = "https:/" // second slash appended in expandPath() call
 	httpPrefix  = "http:/"  // second slash appended in expandPath() call
@@ -81,7 +82,9 @@ func validateConfig(c *gabs.Container) error {
 			if _, ok := v.Data().(float64); !ok {
 				errors = multierror.Append(errors, fmt.Errorf("expected float64 value for %T, got: %v", k, v.Data()))
 			}
-		case "ssl_off":
+		case
+		    "ssl_off",
+		    "pass":
 			// check that v is a boolean, else return error.
 			if _, ok := v.Data().(bool); !ok {
 				errors = multierror.Append(errors, fmt.Errorf("expected bool value for %T, got: %v", k, v.Data()))

@@ -35,6 +35,22 @@ l:
     port: 8080
     s:
       expand: service
+ak:
+  expand: kafka.apache.org
+  hi:
+    expand: contact
+  "*":
+    d:
+      expand: documentation.html
+    j:
+      expand: javadoc/index.html?overview-summary.html
+wc:
+  expand: wildcard.com
+  "*":
+    "*":
+      "*":
+        four:
+          expand: "4"
 `
 
 func loadTestYaml() (*gabs.Container, error) {

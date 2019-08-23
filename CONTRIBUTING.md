@@ -32,3 +32,4 @@ go test ./... -v
 
 - [Ivan Smirnov](http://ivansmirnov.name)
 - [Sergey Smirnov](https://smirnov.nyc/)
+- [Chris Egerton](https://github.com/C0urante)

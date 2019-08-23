@@ -116,6 +116,8 @@ Open up `c.yml` and update the mappings you would like. You can nest arbitrarily
 - `query` - acts almost like the `expand` option, but drops the separating slash between query expansion and search term (`example.com?q=foo` instead of `example.com?q=/foo`).
 - `port` - only valid as the first child under a host. Takes an int and appends it as `:$INT` to the host defined. See the usage in the [sample config](c.yml)
 
+Additionally, you can use `"*"` to capture a path element that should be retained as-is while also allowing for expansion of later elements to take place.
+
 Important gotcha: yaml has [reserved types](http://yaml.org/type/bool.html) and thus `n`, `y`, `no` and the like need to be quoted. See the sample config.
 
 When you add a new shortcut, you need to indicate to your web browser that it's not a search term. You can do this by typing it in once with just a slash. For example, if you add a shortcut `g/z` -> `github.com/issmirnov/zap`, if you try `g/z` right away you will get taken to the search page. Instead, try `g/` once, and then `g/z`. This initial step only needs to be taken once per new shortcut.
@@ -159,6 +161,15 @@ l:
     port: 8080
   "n":
     port: 9001
+ak:
+  expand: kafka.apache.org
+    hi:
+      expand: contact
+    "*":
+      j:
+        expand: javadoc/index.html?overview-summary.html
+      d:
+        expand: documentation.html
 ```
 
 With this config, you can use the following queries:
@@ -167,6 +178,8 @@ With this config, you can use the following queries:
   - `f/zuck` -> facebook.com/zuck
   - `f/php` -> facebook.com/groups/2204685680/
   - `r/catsstandingup` -> reddit.com/r/catsstandingup
+  - `ak/hi` -> kafka.apache.org/contact
+  - `ak/23/j` -> kafka.apache.org/23/javadoc/index.html?overview-summary.html
 
 ### Troubleshooting
 
@@ -242,3 +255,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 ## Contributors
 
 - [Ivan Smirnov](http://ivansmirnov.name)
+- [Chris Egerton](https://github.com/C0urante)
