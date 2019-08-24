@@ -101,10 +101,10 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 		expandPath(child, token.Next(), res)
 		return
 	} else if child, pass := children[passKey]; pass {
-	    res.WriteString("/")
-	    res.WriteString(token.Value.(string))
-	    expandPath(child, token.Next(), res)
-	    return
+		res.WriteString("/")
+		res.WriteString(token.Value.(string))
+		expandPath(child, token.Next(), res)
+		return
 	}
 
 	// if tokens left over, append the rest

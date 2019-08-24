@@ -138,75 +138,75 @@ func TestExpander(t *testing.T) {
 		})
 	})
 	Convey("Given 'wc/1/*/3/four'", t, func() {
-	    c, _ := loadTestYaml()
-	    l := tokenize("wc/1/*/3/four")
-	    var res bytes.Buffer
-	    res.WriteString(httpsPrefix)
+		c, _ := loadTestYaml()
+		l := tokenize("wc/1/*/3/four")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
 
-        expandPath(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
-        Convey("result should equal 'https://wildcard.com/1/*/3/4'", func() {
-            So(res.String(), ShouldEqual, "https://wildcard.com/1/*/3/4")
-        })
+		Convey("result should equal 'https://wildcard.com/1/*/3/4'", func() {
+			So(res.String(), ShouldEqual, "https://wildcard.com/1/*/3/4")
+		})
 	})
 	Convey("Given 'wc/1/2/3/four'", t, func() {
-	    c, _ := loadTestYaml()
-	    l := tokenize("wc/1/2/3/four")
-	    var res bytes.Buffer
-	    res.WriteString(httpsPrefix)
+		c, _ := loadTestYaml()
+		l := tokenize("wc/1/2/3/four")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
 
-        expandPath(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
-        Convey("result should equal 'https://wildcard.com/1/2/3/4'", func() {
-            So(res.String(), ShouldEqual, "https://wildcard.com/1/2/3/4")
-        })
+		Convey("result should equal 'https://wildcard.com/1/2/3/4'", func() {
+			So(res.String(), ShouldEqual, "https://wildcard.com/1/2/3/4")
+		})
 	})
 	Convey("Given 'ak/hi'", t, func() {
-	    c, _ := loadTestYaml()
-	    l := tokenize("ak/hi")
-	    var res bytes.Buffer
-	    res.WriteString(httpsPrefix)
+		c, _ := loadTestYaml()
+		l := tokenize("ak/hi")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
 
-        expandPath(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
-        Convey("result should equal 'https://kafka.apache.org/contact", func() {
-            So(res.String(), ShouldEqual, "https://kafka.apache.org/contact")
-        })
+		Convey("result should equal 'https://kafka.apache.org/contact", func() {
+			So(res.String(), ShouldEqual, "https://kafka.apache.org/contact")
+		})
 	})
 	Convey("Given 'ak/23'", t, func() {
-	    c, _ := loadTestYaml()
-	    l := tokenize("ak/23")
-	    var res bytes.Buffer
-	    res.WriteString(httpsPrefix)
+		c, _ := loadTestYaml()
+		l := tokenize("ak/23")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
 
-        expandPath(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
-        Convey("result should equal 'https://kafka.apache.org/23", func() {
-            So(res.String(), ShouldEqual, "https://kafka.apache.org/23")
-        })
+		Convey("result should equal 'https://kafka.apache.org/23", func() {
+			So(res.String(), ShouldEqual, "https://kafka.apache.org/23")
+		})
 	})
 	Convey("Given 'ak/23/j", t, func() {
-	    c, _ := loadTestYaml()
-	    l := tokenize("ak/23/j")
-	    var res bytes.Buffer
-	    res.WriteString(httpsPrefix)
+		c, _ := loadTestYaml()
+		l := tokenize("ak/23/j")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
 
-        expandPath(c, l.Front(), &res)
+		expandPath(c, l.Front(), &res)
 
-        Convey("result should equal 'https://kafka.apache.org/23/javadoc/index.html?overview-summary.html", func() {
-            So(res.String(), ShouldEqual, "https://kafka.apache.org/23/javadoc/index.html?overview-summary.html")
-        })
+		Convey("result should equal 'https://kafka.apache.org/23/javadoc/index.html?overview-summary.html", func() {
+			So(res.String(), ShouldEqual, "https://kafka.apache.org/23/javadoc/index.html?overview-summary.html")
+		})
 	})
-//	Convey("Given 'ak/expand/j'", t, func() {
-//	    c, _ := loadTestYaml()
-//	    l := tokenize("ak/expand/j")
-//	    var res bytes.Buffer
-//	    res.WriteString(httpsPrefix)
-//
-//        expandPath(c, l.Front(), &res)
-//
-//        Convey("result should equal 'https://kafka.apache.org/expand/j", func() {
-//            So(res.String(), ShouldEqual, "https://kafka.apache.org/expand/j")
-//        })
-//	})
+	//	Convey("Given 'ak/expand/j'", t, func() {
+	//	    c, _ := loadTestYaml()
+	//	    l := tokenize("ak/expand/j")
+	//	    var res bytes.Buffer
+	//	    res.WriteString(httpsPrefix)
+	//
+	//        expandPath(c, l.Front(), &res)
+	//
+	//        Convey("result should equal 'https://kafka.apache.org/expand/j", func() {
+	//            So(res.String(), ShouldEqual, "https://kafka.apache.org/expand/j")
+	//        })
+	//	})
 }
