@@ -22,6 +22,7 @@ const (
 	expandKey   = "expand"
 	queryKey    = "query"
 	portKey     = "port"
+	passKey     = "*"
 	sslKey      = "ssl_off"
 	httpsPrefix = "https:/" // second slash appended in expandPath() call
 	httpPrefix  = "http:/"  // second slash appended in expandPath() call

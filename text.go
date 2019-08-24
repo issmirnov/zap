@@ -42,6 +42,7 @@ func getPrefix(c *gabs.Container) (string, int, error) {
 		}
 		return "", 0, fmt.Errorf("unexpected type of expansion value, got %T instead of int or string", d)
 	}
+
 	q := c.Path(queryKey).Data()
 	if q != nil {
 		if s, ok := q.(string); ok {
@@ -70,8 +71,8 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 		return
 	}
 	children := c.ChildrenMap()
-	child, ok := children[token.Value.(string)]
-	if ok {
+	tokVal := token.Value.(string)
+	if child, ok := children[tokVal]; !isReserved(tokVal) && ok {
 		p, action, err := getPrefix(child)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -99,11 +100,30 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 		}
 		expandPath(child, token.Next(), res)
 		return
+	} else if child, ok := children[passKey]; ok {
+		res.WriteString("/")
+		res.WriteString(token.Value.(string))
+		expandPath(child, token.Next(), res)
+		return
 	}
 
 	// if tokens left over, append the rest
 	for e := token; e != nil; e = e.Next() {
 		res.WriteString("/")
 		res.WriteString(e.Value.(string))
+	}
+}
+
+func isReserved(pathElem string) bool {
+	switch pathElem {
+	case
+		expandKey,
+		queryKey,
+		portKey,
+		passKey,
+		sslKey:
+		return true
+	default:
+		return false
 	}
 }

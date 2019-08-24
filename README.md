@@ -110,11 +110,13 @@ You'll notice the difference is that we have to run as `root` in order to bind t
 
 The config file is located at `/usr/local/etc/zap/c.yml` on OSX. For ubuntu, you will have to create `/etc/zap/c.yml` by hand.
 
-Open up `c.yml` and update the mappings you would like. You can nest arbitrarily deep. Expansions work on strings and ints. Notice that we have three keywords available: `expand`, `query`, and `port`.
+Open up `c.yml` and update the mappings you would like. You can nest arbitrarily deep. Expansions work on strings and ints. Notice that we have three reserved keywords available: `expand`, `query`, and `port`.
 
 - `expand` - takes a short token and expands it to the specified string. Turns `z` into `zap/`,
 - `query` - acts almost like the `expand` option, but drops the separating slash between query expansion and search term (`example.com?q=foo` instead of `example.com?q=/foo`).
 - `port` - only valid as the first child under a host. Takes an int and appends it as `:$INT` to the host defined. See the usage in the [sample config](c.yml)
+
+Additionally, you can use `"*"` to capture a path element that should be retained as-is while also allowing for expansion of later elements to take place.
 
 Important gotcha: yaml has [reserved types](http://yaml.org/type/bool.html) and thus `n`, `y`, `no` and the like need to be quoted. See the sample config.
 
@@ -159,6 +161,15 @@ l:
     port: 8080
   "n":
     port: 9001
+ak:
+  expand: kafka.apache.org
+    hi:
+      expand: contact
+    "*":
+      j:
+        expand: javadoc/index.html?overview-summary.html
+      d:
+        expand: documentation.html
 ```
 
 With this config, you can use the following queries:
@@ -167,6 +178,8 @@ With this config, you can use the following queries:
   - `f/zuck` -> facebook.com/zuck
   - `f/php` -> facebook.com/groups/2204685680/
   - `r/catsstandingup` -> reddit.com/r/catsstandingup
+  - `ak/hi` -> kafka.apache.org/contact
+  - `ak/23/j` -> kafka.apache.org/23/javadoc/index.html?overview-summary.html
 
 ### Troubleshooting
 
@@ -242,3 +255,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md)
 ## Contributors
 
 - [Ivan Smirnov](http://ivansmirnov.name)
+- [Chris Egerton](https://github.com/C0urante)
