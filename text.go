@@ -72,7 +72,7 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 	}
 	children := c.ChildrenMap()
 	tokVal := token.Value.(string)
-	if child, ok := children[tokVal]; tokVal != passKey && ok {
+	if child, ok := children[tokVal]; !isReserved(tokVal) && ok {
 		p, action, err := getPrefix(child)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -100,7 +100,7 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 		}
 		expandPath(child, token.Next(), res)
 		return
-	} else if child, pass := children[passKey]; pass {
+	} else if child, ok := children[passKey]; ok {
 		res.WriteString("/")
 		res.WriteString(token.Value.(string))
 		expandPath(child, token.Next(), res)
@@ -111,5 +111,22 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 	for e := token; e != nil; e = e.Next() {
 		res.WriteString("/")
 		res.WriteString(e.Value.(string))
+	}
+}
+
+func isReserved(pathElem string) bool {
+	switch pathElem {
+	case expandKey:
+		return true
+	case queryKey:
+		return true
+	case portKey:
+		return true
+	case passKey:
+		return true
+	case sslKey:
+		return true
+	default:
+		return false
 	}
 }

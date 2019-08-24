@@ -110,7 +110,7 @@ You'll notice the difference is that we have to run as `root` in order to bind t
 
 The config file is located at `/usr/local/etc/zap/c.yml` on OSX. For ubuntu, you will have to create `/etc/zap/c.yml` by hand.
 
-Open up `c.yml` and update the mappings you would like. You can nest arbitrarily deep. Expansions work on strings and ints. Notice that we have three keywords available: `expand`, `query`, and `port`.
+Open up `c.yml` and update the mappings you would like. You can nest arbitrarily deep. Expansions work on strings and ints. Notice that we have three reserved keywords available: `expand`, `query`, and `port`.
 
 - `expand` - takes a short token and expands it to the specified string. Turns `z` into `zap/`,
 - `query` - acts almost like the `expand` option, but drops the separating slash between query expansion and search term (`example.com?q=foo` instead of `example.com?q=/foo`).

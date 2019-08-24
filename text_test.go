@@ -137,6 +137,18 @@ func TestExpander(t *testing.T) {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foo/bar/baz/")
 		})
 	})
+	Convey("Given 'g/query/homebrew'", t, func() {
+		c, _ := loadTestYaml()
+		l := tokenize("g/query/homebrew")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
+
+		expandPath(c, l.Front(), &res)
+
+		Convey("result should equal 'https://github.com/query/homebrew'", func() {
+			So(res.String(), ShouldEqual, "https://github.com/query/homebrew")
+		})
+	})
 	Convey("Given 'wc/1/*/3/four'", t, func() {
 		c, _ := loadTestYaml()
 		l := tokenize("wc/1/*/3/four")
@@ -197,16 +209,16 @@ func TestExpander(t *testing.T) {
 			So(res.String(), ShouldEqual, "https://kafka.apache.org/23/javadoc/index.html?overview-summary.html")
 		})
 	})
-	//	Convey("Given 'ak/expand/j'", t, func() {
-	//	    c, _ := loadTestYaml()
-	//	    l := tokenize("ak/expand/j")
-	//	    var res bytes.Buffer
-	//	    res.WriteString(httpsPrefix)
-	//
-	//        expandPath(c, l.Front(), &res)
-	//
-	//        Convey("result should equal 'https://kafka.apache.org/expand/j", func() {
-	//            So(res.String(), ShouldEqual, "https://kafka.apache.org/expand/j")
-	//        })
-	//	})
+	Convey("Given 'ak/expand/j'", t, func() {
+		c, _ := loadTestYaml()
+		l := tokenize("ak/expand/j")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
+
+		expandPath(c, l.Front(), &res)
+
+		Convey("result should equal 'https://kafka.apache.org/expand/javadoc/index.html?overview-summary.html", func() {
+			So(res.String(), ShouldEqual, "https://kafka.apache.org/expand/javadoc/index.html?overview-summary.html")
+		})
+	})
 }
