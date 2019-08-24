@@ -116,15 +116,12 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 
 func isReserved(pathElem string) bool {
 	switch pathElem {
-	case expandKey:
-		return true
-	case queryKey:
-		return true
-	case portKey:
-		return true
-	case passKey:
-		return true
-	case sslKey:
+	case
+		expandKey,
+		queryKey,
+		portKey,
+		passKey,
+		sslKey:
 		return true
 	default:
 		return false
