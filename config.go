@@ -82,9 +82,7 @@ func validateConfig(c *gabs.Container) error {
 			if _, ok := v.Data().(float64); !ok {
 				errors = multierror.Append(errors, fmt.Errorf("expected float64 value for %T, got: %v", k, v.Data()))
 			}
-		case
-		    "ssl_off",
-		    "pass":
+		case "ssl_off":
 			// check that v is a boolean, else return error.
 			if _, ok := v.Data().(bool); !ok {
 				errors = multierror.Append(errors, fmt.Errorf("expected bool value for %T, got: %v", k, v.Data()))

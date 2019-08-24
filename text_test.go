@@ -137,6 +137,18 @@ func TestExpander(t *testing.T) {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foo/bar/baz/")
 		})
 	})
+	Convey("Given 'wc/1/*/3/four'", t, func() {
+	    c, _ := loadTestYaml()
+	    l := tokenize("wc/1/*/3/four")
+	    var res bytes.Buffer
+	    res.WriteString(httpsPrefix)
+
+        expandPath(c, l.Front(), &res)
+
+        Convey("result should equal 'https://wildcard.com/1/*/3/4'", func() {
+            So(res.String(), ShouldEqual, "https://wildcard.com/1/*/3/4")
+        })
+	})
 	Convey("Given 'wc/1/2/3/four'", t, func() {
 	    c, _ := loadTestYaml()
 	    l := tokenize("wc/1/2/3/four")
@@ -185,4 +197,16 @@ func TestExpander(t *testing.T) {
             So(res.String(), ShouldEqual, "https://kafka.apache.org/23/javadoc/index.html?overview-summary.html")
         })
 	})
+//	Convey("Given 'ak/expand/j'", t, func() {
+//	    c, _ := loadTestYaml()
+//	    l := tokenize("ak/expand/j")
+//	    var res bytes.Buffer
+//	    res.WriteString(httpsPrefix)
+//
+//        expandPath(c, l.Front(), &res)
+//
+//        Convey("result should equal 'https://kafka.apache.org/expand/j", func() {
+//            So(res.String(), ShouldEqual, "https://kafka.apache.org/expand/j")
+//        })
+//	})
 }

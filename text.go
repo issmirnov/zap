@@ -71,7 +71,8 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 		return
 	}
 	children := c.ChildrenMap()
-	if child, ok := children[token.Value.(string)]; ok {
+	tokVal := token.Value.(string)
+	if child, ok := children[tokVal]; tokVal != passKey && ok {
 		p, action, err := getPrefix(child)
 		if err != nil {
 			fmt.Println(err.Error())
