@@ -7,14 +7,15 @@ build:
     - linux
 checksum:
   name_template: '{{ .ProjectName }}_checksums.txt'
-archive:
-  name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
-  replacements:
-    amd64: 64-bit
-    386: 32-bit
-    darwin: MacOS
-    linux: Linux
-  files:
-    - c.yml
-    - README.md
-    - LICENSE
+archives:
+  - id: main
+    name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      darwin: MacOS
+      linux: Linux
+    files:
+      - c.yml
+      - README.md
+      - LICENSE
