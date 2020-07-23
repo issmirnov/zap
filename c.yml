@@ -14,6 +14,8 @@ a:
     query: s?k=
 c:
   expand: calendar.google.com
+  work: # c/work will take you to your second gmail login
+    expand: calendar/b/1
 e:
   expand: example.com
   ssl_off: yes
@@ -42,5 +44,7 @@ l:
     port: 9001
 m:
   expand: gmail.google.com
+  work: # m/work will take you to the third gmail account
+    expand: mail/u/2
 maps:
   expand: maps.google.com
