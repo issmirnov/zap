@@ -24,9 +24,9 @@ const (
 	portKey     = "port"
 	passKey     = "*"
 	sslKey      = "ssl_off"
+	schemaKey   = "schema"
 	httpsPrefix = "https:/" // second slash appended in expandPath() call
 	httpPrefix  = "http:/"  // second slash appended in expandPath() call
-
 )
 
 // Sentinel value used to indicate set membership.
@@ -35,6 +35,17 @@ var exists = struct{}{}
 // Afero is a filesystem wrapper providing util methods
 // and easy test mocks.
 var Afero = &afero.Afero{Fs: afero.NewOsFs()}
+
+// parseYamlString takes a raw string and attempts to load it.
+func parseYamlString(config string) (*gabs.Container, error) {
+	d, jsonErr := yaml.YAMLToJSON([]byte(config))
+	if jsonErr != nil {
+		fmt.Printf("Error encoding input to JSON.\n%s\n", jsonErr.Error())
+		return nil, jsonErr
+	}
+	j, _ := gabs.ParseJSON(d)
+	return j, nil
+}
 
 // parseYaml takes a file name and returns a gabs config object.
 func parseYaml(fname string) (*gabs.Container, error) {
@@ -71,18 +82,19 @@ func validateConfig(c *gabs.Container) error {
 		// Validate all children
 		switch k {
 		case
-			"expand",
-			"query":
+			expandKey,
+			schemaKey,
+			queryKey:
 			// check that v is a string, else return error.
 			if _, ok := v.Data().(string); !ok {
 				errors = multierror.Append(errors, fmt.Errorf("expected string value for %T, got: %v", k, v.Data()))
 			}
-		case "port":
+		case portKey:
 			// check that v is a float64, else return error.
 			if _, ok := v.Data().(float64); !ok {
 				errors = multierror.Append(errors, fmt.Errorf("expected float64 value for %T, got: %v", k, v.Data()))
 			}
-		case "ssl_off":
+		case sslKey:
 			// check that v is a boolean, else return error.
 			if _, ok := v.Data().(bool); !ok {
 				errors = multierror.Append(errors, fmt.Errorf("expected bool value for %T, got: %v", k, v.Data()))

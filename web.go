@@ -39,7 +39,7 @@ func (cw ctxWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // IndexHandler handles all the non status expansions.
-func IndexHandler(a *context, w http.ResponseWriter, r *http.Request) (int, error) {
+func IndexHandler(ctx *context, w http.ResponseWriter, r *http.Request) (int, error) {
 	var host string
 	if r.Header.Get("X-Forwarded-Host") != "" {
 		host = r.Header.Get("X-Forwarded-Host")
@@ -51,20 +51,31 @@ func IndexHandler(a *context, w http.ResponseWriter, r *http.Request) (int, erro
 	var ok bool
 
 	// Check if host present in config.
-	children := a.config.ChildrenMap()
+	children := ctx.config.ChildrenMap()
 	if hostConfig, ok = children[host]; !ok {
 		return 404, fmt.Errorf("Shortcut '%s' not found in config.", host)
 	}
 
 	tokens := tokenize(host + r.URL.Path)
+
+	// Set up handles on token and config. We might need to skip ahead if there's a custom schema set.
+	tokensStart := tokens.Front()
+	conf := ctx.config
+
 	var path bytes.Buffer
 	if s := hostConfig.Path(sslKey).Data(); s != nil && s.(bool) {
 		path.WriteString(httpPrefix)
+	} else if s := hostConfig.Path(schemaKey).Data(); s != nil && s.(string) != "" {
+		path.WriteString(hostConfig.Path(schemaKey).Data().(string) + ":/")
+		// move one token ahead to parse expansions correctly.
+		conf = conf.ChildrenMap()[tokensStart.Value.(string)]
+		tokensStart = tokensStart.Next()
 	} else {
+		// Default to regular https prefix.
 		path.WriteString(httpsPrefix)
 	}
 
-	expandPath(a.config, tokens.Front(), &path)
+	expandPath(conf, tokensStart, &path)
 
 	// send result
 	http.Redirect(w, r, path.String(), http.StatusFound)

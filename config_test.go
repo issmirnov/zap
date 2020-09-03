@@ -3,6 +3,8 @@ package main
 import (
 	"testing"
 
+	"github.com/Jeffail/gabs/v2"
+
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/spf13/afero"
 )
@@ -54,6 +56,65 @@ g:
 l:
   port: "not_int"
 `
+
+const cYaml = `
+e:
+  expand: example.com
+  a:
+    expand: apples
+  b:
+    expand: bananas
+g:
+  expand: github.com
+  d:
+    expand: issmirnov/dotfiles
+  z:
+    expand: issmirnov/zap
+  s:
+    query: "search?q="
+z:
+  expand: zero.com
+  ssl_off: yes
+zz:
+  expand: zero.ssl.on.com
+  ssl_off: no
+l:
+  expand: localhost
+  ssl_off: yes
+  a:
+    port: 8080
+    s:
+      expand: service
+ak:
+  expand: kafka.apache.org
+  hi:
+    expand: contact
+  "*":
+    d:
+      expand: documentation.html
+    j:
+      expand: javadoc/index.html?overview-summary.html
+wc:
+  expand: wildcard.com
+  "*":
+    "*":
+      "*":
+        four:
+          expand: "4"
+ch:
+  # expand: "/"
+  v:
+    expand: version # should expand to chrome://version
+  'n':
+    expand: net-internals
+    d:
+      expand: '#dns'
+  schema: chrome 
+`
+
+func loadTestYaml() (*gabs.Container, error) {
+	return parseYamlString(cYaml)
+}
 
 func TestParseYaml(t *testing.T) {
 	Convey("Given a valid 'c.yml' file", t, func() {

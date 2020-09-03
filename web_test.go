@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"golang.org/x/exp/errors/fmt"
+
 	"github.com/ghodss/yaml"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -227,6 +229,66 @@ func TestIndexHandler(t *testing.T) {
 			Convey("The result should be a 302 to http://localhost:8080/service/", func() {
 				So(rr.Code, ShouldEqual, http.StatusFound)
 				So(rr.Header().Get("Location"), ShouldEqual, "http://localhost:8080/service/")
+			})
+		})
+
+		Convey("When we GET http://ch/ with schema set to 'chrome' ", func() {
+			req, err := http.NewRequest("GET", "/", nil)
+			So(err, ShouldBeNil)
+			req.Host = "ch"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			expected := "chrome://"
+			Convey(fmt.Sprintf("The result should be a 302 to %s", expected), func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, expected)
+			})
+		})
+
+		Convey("When we GET http://ch/foobar with schema set to 'chrome' where 'foobar' isn't in the config ", func() {
+			req, err := http.NewRequest("GET", "/foobar", nil)
+			So(err, ShouldBeNil)
+			req.Host = "ch"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			expected := "chrome://foobar"
+			Convey(fmt.Sprintf("The result should be a 302 to %s", expected), func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, expected)
+			})
+		})
+
+		Convey("When we GET http://ch/v with schema set to 'chrome' ", func() {
+			req, err := http.NewRequest("GET", "/v", nil)
+			So(err, ShouldBeNil)
+			req.Host = "ch"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			expected := "chrome://version"
+			Convey(fmt.Sprintf("The result should be a 302 to %s", expected), func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, expected)
+			})
+		})
+
+		Convey("When we GET http://ch/n/d with schema set to 'chrome' ", func() {
+			req, err := http.NewRequest("GET", "/n/d", nil)
+			So(err, ShouldBeNil)
+			req.Host = "ch"
+
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			expected := "chrome://net-internals/#dns"
+			Convey(fmt.Sprintf("The result should be a 302 to %s", expected), func() {
+				So(rr.Code, ShouldEqual, http.StatusFound)
+				So(rr.Header().Get("Location"), ShouldEqual, expected)
 			})
 		})
 
