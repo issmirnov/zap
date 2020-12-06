@@ -1,4 +1,4 @@
-package main
+package zap
 
 import (
 	"bytes"
@@ -59,11 +59,11 @@ func getPrefix(c *gabs.Container) (string, int, error) {
 		return "", 0, fmt.Errorf("casting port key to float64 failed for %T:%v", p, p)
 	}
 
-	return "", 0, fmt.Errorf("error in config, no key matching 'expand', 'query', 'port' or 'schema' in %s", c.String())
+	return "", 0, fmt.Errorf("error in Config, no key matching 'expand', 'query', 'port' or 'schema' in %s", c.String())
 }
 
-// expandPath takes a config, list of tokens (parsed from request) and the results buffer
-// At each level of recursion, it matches the token to the action described in the config, and writes it
+// expandPath takes a Config, list of tokens (parsed from request) and the results buffer
+// At each level of recursion, it matches the token to the action described in the Config, and writes it
 // to the result buffer. There is special care needed to handle slashes correctly, which makes this function
 // quite nontrivial. Tests are crucial to ensure correctness.
 func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {

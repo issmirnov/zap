@@ -1,4 +1,4 @@
-package main
+package zap
 
 import (
 	"testing"
@@ -120,8 +120,8 @@ func TestParseYaml(t *testing.T) {
 	Convey("Given a valid 'c.yml' file", t, func() {
 		Afero = &afero.Afero{Fs: afero.NewMemMapFs()}
 		Afero.WriteFile("c.yml", []byte(cYaml), 0644)
-		c, err := parseYaml("c.yml")
-		Convey("parseYaml should throw no error", func() {
+		c, err := ParseYaml("c.yml")
+		Convey("ParseYaml should throw no error", func() {
 			So(err, ShouldBeNil)
 		})
 		Convey("the gabs object should have path 'zz' present", func() {
@@ -131,33 +131,33 @@ func TestParseYaml(t *testing.T) {
 }
 
 func TestValidateConfig(t *testing.T) {
-	Convey("Given a correctly formatted yaml config", t, func() {
+	Convey("Given a correctly formatted yaml Config", t, func() {
 		conf, _ := parseYamlString(cYaml)
 		//fmt.Printf(err.Error())
 		Convey("The validator should pass", func() {
-			So(validateConfig(conf), ShouldBeNil)
+			So(ValidateConfig(conf), ShouldBeNil)
 		})
 	})
 
 	// The YAML libraries don't have support for detecting duplicate keys
 	// at parse time. Users will have to figure this out themselves.
-	//Convey("Given a yaml config with duplicated keys", t, func() {
+	//Convey("Given a yaml Config with duplicated keys", t, func() {
 	//	conf, _ := parseYamlString(duplicatedYAML)
 	//	Convey("The validator should complain", func() {
-	//		So(validateConfig(conf), ShouldNotBeNil)
+	//		So(ValidateConfig(conf), ShouldNotBeNil)
 	//	})
 	//})
 
-	Convey("Given a YAML config with unknown keys", t, func() {
+	Convey("Given a YAML Config with unknown keys", t, func() {
 		conf, _ := parseYamlString(badkeysYAML)
 		Convey("The validator should raise an error", func() {
-			So(validateConfig(conf), ShouldNotBeNil)
+			So(ValidateConfig(conf), ShouldNotBeNil)
 		})
 	})
 
-	Convey("Given a YAML config with malformed values", t, func() {
+	Convey("Given a YAML Config with malformed values", t, func() {
 		conf, _ := parseYamlString(badValuesYAML)
-		err := validateConfig(conf)
+		err := ValidateConfig(conf)
 		Convey("The validator should raise a ton of errors", func() {
 			So(err, ShouldNotBeNil)
 			So(err.Error(), ShouldContainSubstring, "expected float64 value for string, got: not_int")
