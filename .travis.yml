@@ -18,8 +18,8 @@ matrix:
       env:
         - LATEST=true
         - GO111MODULE=on
-    - go: 1.11.x
-    - go: 1.12.x
+    - go: 1.11.x # maintain compatibility with oldest go version possible.
+    - go: 1.15.x
     - go: tip
   allow_failures:
     - go: tip
