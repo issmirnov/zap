@@ -48,3 +48,41 @@ m:
     expand: mail/u/2
 maps:
   expand: maps.google.com
+
+z:
+  expand: zero.com
+  ssl_off: yes
+zz:
+  expand: zero.ssl.on.com
+  ssl_off: no
+l:
+  expand: localhost
+  ssl_off: yes
+  a:
+    port: 8080
+    s:
+      expand: service
+# Wildcard expansions allow you to query specific java versions.
+# Example: "ak/11/j" -> "https://kafka.apache.org/11/javadoc/index.html?overview-summary.html"
+ak:
+  expand: kafka.apache.org
+  hi:
+    expand: contact
+  "*":
+    d:
+      expand: documentation.html
+    j:
+      expand: javadoc/index.html?overview-summary.html
+
+# Note: chrome will block redirects to the "chrome://" schema. This makes sense, otherwise folks could abuse
+# chrome://restart or change settings without users knowing. That said, this expansion is kept here as a reference
+# on the "schema" usage. If you often need to use sftp:// or other schemas, this should work for you.
+ch:
+  # expand: "/"
+  v:
+    expand: version # should expand to chrome://version
+  'n':
+    expand: net-internals
+    d:
+      expand: '#dns'
+  schema: chrome
