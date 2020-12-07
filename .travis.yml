@@ -39,8 +39,8 @@ os:
 script:
   - diff -u <(echo -n) <(go fmt $(go list ./...))
   - go vet $(go list ./...)
-  - go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic
-  - go build -v ./...
+  - go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic ./cmd
+  - go build -o zap -v ./cmd/
   - ./e2e.sh
 
 # calls goreleaser

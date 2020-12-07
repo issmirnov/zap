@@ -7,6 +7,9 @@ dist/
 # compiled files
 zap
 
+# Include our actual code, which is excluded by the "zap" directive above.
+!/cmd/zap
+
 # Goland
 .idea/*
 

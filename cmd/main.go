@@ -8,6 +8,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/issmirnov/zap/cmd/zap"
+
 	"github.com/fsnotify/fsnotify"
 
 	"github.com/julienschmidt/httprouter"
@@ -34,7 +36,7 @@ func main() {
 	}
 
 	// load config for first time.
-	c, err := parseYaml(*configName)
+	c, err := zap.ParseYaml(*configName)
 	if err != nil {
 		log.Printf("Error parsing config file. Please fix syntax: %s\n", err)
 		return
@@ -42,7 +44,7 @@ func main() {
 
 	// Perform extended validation of config.
 	if *validate {
-		if err := validateConfig(c); err != nil {
+		if err := zap.ValidateConfig(c); err != nil {
 			fmt.Println(err.Error())
 			os.Exit(1)
 		}
@@ -50,8 +52,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	context := &context{config: c}
-	updateHosts(context) // sync changes since last run.
+	context := &zap.Context{Config: c}
+	zap.UpdateHosts(context) // sync changes since last run.
 
 	// Enable hot reload.
 	watcher, err := fsnotify.NewWatcher()
@@ -60,26 +62,30 @@ func main() {
 	}
 	defer watcher.Close()
 
-	// Enable hot reload.
-	cb := makeCallback(context, *configName)
-	go watchChanges(watcher, *configName, cb)
+	cb := zap.MakeReloadCallback(context, *configName)
+	go zap.WatchConfigFileChanges(watcher, *configName, cb)
 	err = watcher.Add(path.Dir(*configName))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Set up routes.
-	router := httprouter.New()
-	router.Handler("GET", "/", ctxWrapper{context, IndexHandler})
-	router.Handler("GET", "/varz", ctxWrapper{context, VarsHandler})
-	router.HandlerFunc("GET", "/healthz", HealthHandler)
-
-	// https://github.com/julienschmidt/httprouter is having issues with
-	// wildcard handling. As a result, we have to register index handler
-	// as the fallback. Fix incoming.
-	router.NotFound = ctxWrapper{context, IndexHandler}
+	router := SetupRouter(context)
 
 	// TODO check for errors - addr in use, sudo issues, etc.
 	fmt.Printf("Launching %s on %s:%d\n", appName, *host, *port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", *host, *port), router))
+}
+
+func SetupRouter(context *zap.Context) *httprouter.Router {
+	router := httprouter.New()
+	router.Handler("GET", "/", zap.CtxWrapper{Context: context, H: zap.IndexHandler})
+	router.Handler("GET", "/varz", zap.CtxWrapper{Context: context, H: zap.VarsHandler})
+	router.HandlerFunc("GET", "/healthz", zap.HealthHandler)
+
+	// https://github.com/julienschmidt/httprouter is having issues with
+	// wildcard handling. As a result, we have to register index handler
+	// as the fallback. Fix incoming.
+	router.NotFound = zap.CtxWrapper{Context: context, H: zap.IndexHandler}
+	return router
 }

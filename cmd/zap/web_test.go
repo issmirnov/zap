@@ -1,4 +1,4 @@
-package main
+package zap
 
 import (
 	"net/http"
@@ -11,16 +11,16 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
-// TODO: add tests that use erroneous config.
+// TODO: add tests that use erroneous Config.
 // Will likely require injecting custom logger and intercepting error msgs.
 
 // See https://elithrar.github.io/article/testing-http-handlers-go/ for comments.
 func TestIndexHandler(t *testing.T) {
-	Convey("Given app is set up with default config", t, func() {
+	Convey("Given app is set up with default Config", t, func() {
 		c, err := loadTestYaml()
 		So(err, ShouldBeNil)
-		context := &context{config: c}
-		appHandler := &ctxWrapper{context, IndexHandler}
+		context := &Context{Config: c}
+		appHandler := &CtxWrapper{context, IndexHandler}
 		handler := http.Handler(appHandler)
 		Convey("When we GET http://g/z", func() {
 			req, err := http.NewRequest("GET", "/z", nil)
@@ -247,7 +247,7 @@ func TestIndexHandler(t *testing.T) {
 			})
 		})
 
-		Convey("When we GET http://ch/foobar with schema set to 'chrome' where 'foobar' isn't in the config ", func() {
+		Convey("When we GET http://ch/foobar with schema set to 'chrome' where 'foobar' isn't in the Config ", func() {
 			req, err := http.NewRequest("GET", "/foobar", nil)
 			So(err, ShouldBeNil)
 			req.Host = "ch"
@@ -295,12 +295,12 @@ func TestIndexHandler(t *testing.T) {
 	})
 }
 
-// BenchmarkIndexHandler tests request processing geed when context is preloaded.
+// BenchmarkIndexHandler tests request processing speed when Context is preloaded.
 // Run with go test -run=BenchmarkIndexHandler -bench=. // results: 500000x	2555 ns/op
 func BenchmarkIndexHandler(b *testing.B) {
 	c, _ := loadTestYaml()
-	context := &context{config: c}
-	appHandler := &ctxWrapper{context, IndexHandler}
+	context := &Context{Config: c}
+	appHandler := &CtxWrapper{context, IndexHandler}
 	handler := http.Handler(appHandler)
 	req, _ := http.NewRequest("GET", "/z", nil)
 	req.Host = "g"
@@ -329,12 +329,12 @@ func TestHealthCheckHandler(t *testing.T) {
 }
 
 func TestVarzHandler(t *testing.T) {
-	Convey("Given app is set up with default config", t, func() {
+	Convey("Given app is set up with default Config", t, func() {
 		c, err := loadTestYaml()
 		So(err, ShouldBeNil)
-		context := &context{config: c}
+		context := &Context{Config: c}
 
-		appHandler := &ctxWrapper{context, VarsHandler}
+		appHandler := &CtxWrapper{context, VarsHandler}
 		handler := http.Handler(appHandler)
 		Convey("When we GET /varz", func() {
 			req, err := http.NewRequest("GET", "/varz", nil)
@@ -351,17 +351,17 @@ func TestVarzHandler(t *testing.T) {
 				_, err := yaml.YAMLToJSON(rr.Body.Bytes())
 				So(err, ShouldBeNil)
 			})
-			Convey("It should equal the config file", func() {
+			Convey("It should equal the Config file", func() {
 				conf, err := yaml.YAMLToJSON(c.Bytes())
-				So(err, ShouldBeNil) // sanity check.
+				So(err, ShouldBeNil)
 
 				resp, err := yaml.YAMLToJSON(rr.Body.Bytes())
-				So(err, ShouldBeNil) // sanity check.
+				So(err, ShouldBeNil)
 
+				// This does not work: "So(resp, ShouldEqual, []byte(jsonPrettyPrint(string(conf))))"
 				// We get a nicely formatted response, but when we feed it into YAMLToJSON it collapses our nice
 				// newlines. As a result, directly comparing the byte arrays here is a nogo. Therefore, we cheat
 				// and utilize the separately tested jsonPrettyPrint to idempotently indent the JSON and compare that.
-				// This does not work: "So(resp, ShouldEqual, []byte(jsonPrettyPrint(string(conf))))"
 				So(jsonPrettyPrint(string(resp)), ShouldEqual, jsonPrettyPrint(string(conf)))
 			})
 		})

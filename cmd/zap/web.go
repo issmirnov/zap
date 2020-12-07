@@ -1,45 +1,18 @@
-package main
+package zap
 
 import (
 	"bytes"
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 
 	"encoding/json"
 
 	"github.com/Jeffail/gabs/v2"
 )
 
-type context struct {
-	// Json container with path configs
-	config *gabs.Container
-
-	// Enables safe hot reloading of config.
-	configMtx sync.Mutex
-}
-
-type ctxWrapper struct {
-	*context
-	H func(*context, http.ResponseWriter, *http.Request) (int, error)
-}
-
-func (cw ctxWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	status, err := cw.H(cw.context, w, r) // this runs the actual handler, defined in struct.
-	if err != nil {
-		switch status {
-		case http.StatusInternalServerError:
-			http.Error(w, fmt.Sprintf("HTTP %d: %q", status, err), status)
-			// TODO - add bad request?
-		default:
-			http.Error(w, err.Error(), status)
-		}
-	}
-}
-
 // IndexHandler handles all the non status expansions.
-func IndexHandler(ctx *context, w http.ResponseWriter, r *http.Request) (int, error) {
+func IndexHandler(ctx *Context, w http.ResponseWriter, r *http.Request) (int, error) {
 	var host string
 	if r.Header.Get("X-Forwarded-Host") != "" {
 		host = r.Header.Get("X-Forwarded-Host")
@@ -50,17 +23,17 @@ func IndexHandler(ctx *context, w http.ResponseWriter, r *http.Request) (int, er
 	var hostConfig *gabs.Container
 	var ok bool
 
-	// Check if host present in config.
-	children := ctx.config.ChildrenMap()
+	// Check if host present in Config.
+	children := ctx.Config.ChildrenMap()
 	if hostConfig, ok = children[host]; !ok {
-		return 404, fmt.Errorf("Shortcut '%s' not found in config.", host)
+		return 404, fmt.Errorf("Shortcut '%s' not found in Config.", host)
 	}
 
 	tokens := tokenize(host + r.URL.Path)
 
-	// Set up handles on token and config. We might need to skip ahead if there's a custom schema set.
+	// Set up handles on token and Config. We might need to skip ahead if there's a custom schema set.
 	tokensStart := tokens.Front()
-	conf := ctx.config
+	conf := ctx.Config
 
 	var path bytes.Buffer
 	if s := hostConfig.Path(sslKey).Data(); s != nil && s.(bool) {
@@ -89,10 +62,10 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, `OK`)
 }
 
-// VarsHandler responds to /varz request and prints config.
-func VarsHandler(c *context, w http.ResponseWriter, r *http.Request) (int, error) {
+// VarsHandler responds to /varz request and prints Config.
+func VarsHandler(c *Context, w http.ResponseWriter, r *http.Request) (int, error) {
 	w.WriteHeader(http.StatusOK)
-	io.WriteString(w, jsonPrettyPrint(c.config.String()))
+	io.WriteString(w, jsonPrettyPrint(c.Config.String()))
 	return 200, nil
 }
 

@@ -1,4 +1,4 @@
-package main
+package zap
 
 import (
 	"bytes"
@@ -47,8 +47,8 @@ func parseYamlString(config string) (*gabs.Container, error) {
 	return j, nil
 }
 
-// parseYaml takes a file name and returns a gabs config object.
-func parseYaml(fname string) (*gabs.Container, error) {
+// ParseYaml takes a file name and returns a gabs Config object.
+func ParseYaml(fname string) (*gabs.Container, error) {
 	data, err := Afero.ReadFile(fname)
 	if err != nil {
 		fmt.Printf("Unable to read file: %s\n", err.Error())
@@ -63,10 +63,10 @@ func parseYaml(fname string) (*gabs.Container, error) {
 	return j, nil
 }
 
-// validateConfig verifies that there are no unexpected values in the config file.
-// at each level of the config, we should either have a KV for expansions, or a leaf node
+// ValidateConfig verifies that there are no unexpected values in the Config file.
+// at each level of the Config, we should either have a KV for expansions, or a leaf node
 // with the values oneof "expand", "query", "ssl_off" that map to a string.
-func validateConfig(c *gabs.Container) error {
+func ValidateConfig(c *gabs.Container) error {
 	var errors *multierror.Error
 	children := c.ChildrenMap()
 	seenKeys := make(map[string]struct{})
@@ -105,7 +105,7 @@ func validateConfig(c *gabs.Container) error {
 				errors = multierror.Append(errors, fmt.Errorf("unexpected string value under key %s, got: %v", k, v.Data()))
 			}
 			// recurse, collect any errors.
-			if err := validateConfig(v); err != nil {
+			if err := ValidateConfig(v); err != nil {
 				errors = multierror.Append(errors, err)
 			}
 		}
@@ -113,7 +113,9 @@ func validateConfig(c *gabs.Container) error {
 	return errors.ErrorOrNil()
 }
 
-func watchChanges(watcher *fsnotify.Watcher, fname string, cb func()) {
+// WatchConfigFileChanges will attach an fsnotify watcher to the config file, and trigger
+// the cb function when the file is updated.
+func WatchConfigFileChanges(watcher *fsnotify.Watcher, fname string, cb func()) {
 	for {
 		select {
 		case event := <-watcher.Events:
@@ -133,22 +135,22 @@ func watchChanges(watcher *fsnotify.Watcher, fname string, cb func()) {
 }
 
 // TODO: add tests. simulate touching a file.
-// updateHosts will attempt to write the zap list of shortcuts
+// UpdateHosts will attempt to write the zap list of shortcuts
 // to /etc/hosts. It will gracefully fail if there are not enough
 // permissions to do so.
-func updateHosts(c *context) {
+func UpdateHosts(c *Context) {
 	hostPath := "/etc/hosts"
 
 	// 1. read file, prep buffer.
 	data, err := ioutil.ReadFile(hostPath)
 	if err != nil {
-		log.Println("open config: ", err)
+		log.Println("open Config: ", err)
 	}
 	var replacement bytes.Buffer
 
 	// 2. generate payload.
 	replacement.WriteString(delimStart)
-	children := c.config.ChildrenMap()
+	children := c.Config.ChildrenMap()
 	for k := range children {
 		replacement.WriteString(fmt.Sprintf("127.0.0.1 %s\n", k))
 	}
@@ -170,27 +172,27 @@ func updateHosts(c *context) {
 	}
 }
 
-// makeCallback returns a func that that updates global state.
-func makeCallback(c *context, configName string) func() {
+// MakeReloadCallback returns a func that that reads the config file and updates global state.
+func MakeReloadCallback(c *Context, configName string) func() {
 	return func() {
-		data, err := parseYaml(configName)
+		data, err := ParseYaml(configName)
 		if err != nil {
-			log.Printf("Error loading new config: %s. Fallback to old config.", err)
+			log.Printf("Error loading new Config: %s. Fallback to old Config.", err)
 			return
 		}
-		err = validateConfig(data)
+		err = ValidateConfig(data)
 		if err != nil {
-			log.Printf("Error validating new config: %s. Fallback to old config.", err)
+			log.Printf("Error validating new Config: %s. Fallback to old Config.", err)
 			return
 		}
 
-		// Update config atomically
-		c.configMtx.Lock()
-		c.config = data
-		c.configMtx.Unlock()
+		// Update Config atomically
+		c.ConfigMtx.Lock()
+		c.Config = data
+		c.ConfigMtx.Unlock()
 
 		// Sync DNS entries.
-		updateHosts(c)
+		UpdateHosts(c)
 		return
 	}
 }
