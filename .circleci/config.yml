@@ -4,7 +4,7 @@
 docker-image: &docker-image circleci/golang:1.15
 version: 2
 jobs:
-  checkout_and_lint:
+  lint:
     docker:
       - image: *docker-image
     working_directory: /go/src/github.com/issmirnov/zap
