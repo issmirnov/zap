@@ -19,6 +19,7 @@ jobs:
       - image: *docker-image
     working_directory: /go/src/github.com/issmirnov/zap
     steps:
+      - checkout
       - run: go build -o zap -v ./cmd/
   test:
     docker:
@@ -27,6 +28,7 @@ jobs:
 
     working_directory: /go/src/github.com/issmirnov/zap
     steps:
+      - checkout
       - run: go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic ./cmd
       - run: go test -v ./...
       - run: ./e2e.sh
@@ -38,5 +40,3 @@ workflows:
       - checkout_and_lint
       - build
       - test
-
-
