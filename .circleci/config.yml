@@ -9,6 +9,7 @@ jobs:
       - image: *docker-image
     working_directory: /go/src/github.com/issmirnov/zap
     steps:
+      - checkout
       - run: diff -u <(echo -n) <(go fmt $(go list ./...))
       - run: go vet $(go list ./...)
       - run: go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic ./cmd
