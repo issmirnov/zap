@@ -7,7 +7,7 @@ jobs:
   checkout_and_lint:
     docker:
       - image: *docker-image
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/issmirnov/zap
     steps:
       - run: diff -u <(echo -n) <(go fmt $(go list ./...))
       - run: go vet $(go list ./...)
@@ -16,7 +16,7 @@ jobs:
   build:
     docker:
       - image: *docker-image
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/issmirnov/zap
     steps:
       - run: go build -o zap -v ./cmd/
   test:
@@ -24,7 +24,7 @@ jobs:
       # specify the version
       - image: circleci/golang:1.15
 
-    working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
+    working_directory: /go/src/github.com/issmirnov/zap
     steps:
       - run: go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic ./cmd
       - run: go test -v ./...
