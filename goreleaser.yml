@@ -1,20 +1,30 @@
 # https://github.com/goreleaser/goreleaser/blob/master/.goreleaser.yml
 build:
-  main: .
+  main: ./cmd/main.go
   binary: zap
   goos:
     - darwin
     - linux
+  goarch:
+    - amd64
+    - 386
+    - arm64
+  ignore:
+    - goos: darwin
+      goarch: 386
+  ldflags:
+    - -s -w
 checksum:
   name_template: '{{ .ProjectName }}_checksums.txt'
 archives:
-  - id: main
+  - id: cmd
     name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
     replacements:
       amd64: 64-bit
       386: 32-bit
       darwin: MacOS
       linux: Linux
+      arm64: Arm
     files:
       - c.yml
       - README.md
