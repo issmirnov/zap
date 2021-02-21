@@ -31,6 +31,7 @@ jobs:
       - run: ./e2e.sh
 
 workflows:
+  version: 2
   build_and_test:
     jobs:
       - checkout_and_lint
