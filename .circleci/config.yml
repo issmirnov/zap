@@ -14,14 +14,7 @@ jobs:
       - run: go vet $(go list ./...)
       - run: go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic ./cmd
       - run: go get -v -t -d ./...
-  build:
-    docker:
-      - image: *docker-image
-    working_directory: /go/src/github.com/issmirnov/zap
-    steps:
-      - checkout
-      - run: go build -o zap -v ./cmd/
-  test:
+  build_and_test:
     docker:
       # specify the version
       - image: circleci/golang:1.15
@@ -29,6 +22,7 @@ jobs:
     working_directory: /go/src/github.com/issmirnov/zap
     steps:
       - checkout
+      - run: go build -o zap -v ./cmd/
       - run: go test -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic ./cmd
       - run: go test -v ./...
       - run: ./e2e.sh
@@ -37,6 +31,5 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - checkout_and_lint
-      - build
-      - test
+      - lint
+      - build_and_test
