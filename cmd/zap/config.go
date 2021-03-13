@@ -152,7 +152,7 @@ func UpdateHosts(c *Context) {
 	replacement.WriteString(delimStart)
 	children := c.Config.ChildrenMap()
 	for k := range children {
-		replacement.WriteString(fmt.Sprintf("127.0.0.1 %s\n", k))
+		replacement.WriteString(fmt.Sprintf("%s %s\n", c.Advertise, k))
 	}
 	replacement.WriteString(delimEnd)
 

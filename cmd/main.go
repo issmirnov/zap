@@ -24,7 +24,8 @@ func main() {
 	var (
 		configName = flag.String("config", "c.yml", "config file")
 		port       = flag.Int("port", 8927, "port to bind to")
-		host       = flag.String("host", "127.0.0.1", "host interface")
+		host       = flag.String("host", "127.0.0.1", "host address to bind to")
+		advertise  = flag.String("advertise", "127.0.0.1", "IP to advertise, used in /etc/hosts")
 		v          = flag.Bool("v", false, "print version info")
 		validate   = flag.Bool("validate", false, "load config file and check for errors")
 	)
@@ -52,7 +53,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	context := &zap.Context{Config: c}
+	context := &zap.Context{Config: c, Advertise: *advertise}
 	zap.UpdateHosts(context) // sync changes since last run.
 
 	// Enable hot reload.

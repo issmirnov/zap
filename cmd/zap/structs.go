@@ -9,11 +9,14 @@ import (
 )
 
 type Context struct {
-	// Json container with path configs
+	// Config is a Json container with path configs
 	Config *gabs.Container
 
-	// Enables safe hot reloading of Config.
+	// ConfigMtx Enables safe hot reloading of Config.
 	ConfigMtx sync.Mutex
+
+	// Advertise IP, used in /etc/hosts in case bind address differs.
+	Advertise string
 }
 
 type CtxWrapper struct {

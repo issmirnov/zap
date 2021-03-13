@@ -194,6 +194,9 @@ With this config, you can use the following queries:
 - `-config` - path to config file. Default is `./c.yml`
 - `-port` - port to bind to. Default is 8927. Use 80 in standalone mode.
 - `-host` - default is 127.0.0.1. Use 0.0.0.0 for a public server.
+- `-advertise` - which address to use when populating `/etc/hosts`. 
+  This is useful when running zap behind `dnsmasq`, so that the host bind and advertised address can differ.
+
 
 ### DNS management via /etc/hosts
 
