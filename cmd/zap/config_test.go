@@ -72,6 +72,14 @@ g:
     expand: issmirnov/zap
   s:
     query: "search?q="
+    me:
+      expand: issmirnov
+      z:
+        expand: zap
+    ak:
+      query: apache/kafka
+      c:
+        query: +connect
 z:
   expand: zero.com
   ssl_off: yes

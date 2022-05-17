@@ -48,7 +48,7 @@ func IndexHandler(ctx *Context, w http.ResponseWriter, r *http.Request) (int, er
 		path.WriteString(httpsPrefix)
 	}
 
-	expandPath(conf, tokensStart, &path)
+	ExpandPath(conf, tokensStart, &path)
 
 	// send result
 	http.Redirect(w, r, path.String(), http.StatusFound)

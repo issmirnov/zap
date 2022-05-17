@@ -150,6 +150,8 @@ g:
     expand: issmirnov/dotfiles
   s:
     query: search?q=
+    ak:
+      expand: apache/kafka
   z:
     expand: issmirnov/zap
 r:

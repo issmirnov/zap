@@ -62,11 +62,17 @@ func getPrefix(c *gabs.Container) (string, int, error) {
 	return "", 0, fmt.Errorf("error in Config, no key matching 'expand', 'query', 'port' or 'schema' in %s", c.String())
 }
 
-// expandPath takes a Config, list of tokens (parsed from request) and the results buffer
+// ExpandPath takes a Config, list of tokens (parsed from request) and the results buffer
 // At each level of recursion, it matches the token to the action described in the Config, and writes it
 // to the result buffer. There is special care needed to handle slashes correctly, which makes this function
 // quite nontrivial. Tests are crucial to ensure correctness.
-func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
+func ExpandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
+	expandPath(c, token, res, true)
+}
+
+// Internal helper function that adds contextual information about whether a leading slash
+// should be added to the beginning of the path
+func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer, prependSlash bool) {
 	if token == nil {
 		return
 	}
@@ -79,37 +85,46 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
 			return
 		}
 
+		prependChildSlash := true
+
 		switch action {
-		case expand: // Generic case, write slash followed by expanded token.
-			res.WriteString("/")
-			res.WriteString(p)
-
-		case query: // Write a slash + query string expansion, then perform token skipahead in order to have correct slashes.
-			res.WriteString("/")
-			res.WriteString(p)
-			if token.Next() != nil {
-				res.WriteString(token.Next().Value.(string))
-				token = token.Next()
+		case expand: // Generic case: maybe write slash, then expanded token.
+			if prependSlash {
+				res.WriteString("/")
 			}
+			res.WriteString(p)
 
-		case port: // A little bit of a special case - unlike "expand", we don't want a leading slash.
+		case query: // Maybe write a slash, then expanded query, then recurse with no prepended slashes
+			if prependSlash {
+				res.WriteString("/")
+			}
+			res.WriteString(p)
+			prependChildSlash = false
+
+		case port: // A little bit of a special case - unlike "expand" and "query", we never want a leading slash.
 			res.WriteString(p)
 
 		default:
 			panic("Programmer error, this should never happen.")
 		}
-		expandPath(child, token.Next(), res)
+		expandPath(child, token.Next(), res, prependChildSlash)
 		return
 	} else if child, ok := children[passKey]; ok {
-		res.WriteString("/")
+		if prependSlash {
+			res.WriteString("/")
+		}
 		res.WriteString(token.Value.(string))
-		expandPath(child, token.Next(), res)
+		expandPath(child, token.Next(), res, true)
 		return
 	}
 
 	// if tokens left over, append the rest
 	for e := token; e != nil; e = e.Next() {
-		res.WriteString("/")
+		if prependSlash {
+			res.WriteString("/")
+		} else {
+			prependSlash = true
+		}
 		res.WriteString(e.Value.(string))
 	}
 }

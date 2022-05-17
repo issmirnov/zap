@@ -47,7 +47,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/issmirnov/zap'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap")
@@ -59,7 +59,7 @@ func TestExpander(t *testing.T) {
 	//     var res bytes.Buffer
 	//     res.WriteString(httpsPrefix)
 	//
-	//     expandPath(c, l.Front(), &res)
+	//     ExpandPath(c, l.Front(), &res)
 	//
 	//     Convey("result should equal 'https://example.com/999'", func() {
 	//         So(res.String(), ShouldEqual, "https://example.com/999")
@@ -71,7 +71,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/issmirnov/zap/extratext'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap/extratext")
@@ -83,7 +83,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/")
@@ -95,7 +95,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/issmirnov/zap/very/deep/path'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/issmirnov/zap/very/deep/path")
@@ -107,7 +107,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/search?q=foobar'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foobar")
@@ -119,7 +119,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/search?q=foo/bar/baz'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foo/bar/baz")
@@ -131,7 +131,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/search?q=foo/bar/baz/'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=foo/bar/baz/")
@@ -143,7 +143,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://github.com/query/homebrew'", func() {
 			So(res.String(), ShouldEqual, "https://github.com/query/homebrew")
@@ -155,7 +155,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://wildcard.com/1/*/3/4'", func() {
 			So(res.String(), ShouldEqual, "https://wildcard.com/1/*/3/4")
@@ -167,7 +167,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://wildcard.com/1/2/3/4'", func() {
 			So(res.String(), ShouldEqual, "https://wildcard.com/1/2/3/4")
@@ -179,7 +179,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://kafka.apache.org/contact", func() {
 			So(res.String(), ShouldEqual, "https://kafka.apache.org/contact")
@@ -191,7 +191,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://kafka.apache.org/23", func() {
 			So(res.String(), ShouldEqual, "https://kafka.apache.org/23")
@@ -203,7 +203,7 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://kafka.apache.org/23/javadoc/index.html?overview-summary.html", func() {
 			So(res.String(), ShouldEqual, "https://kafka.apache.org/23/javadoc/index.html?overview-summary.html")
@@ -215,10 +215,58 @@ func TestExpander(t *testing.T) {
 		var res bytes.Buffer
 		res.WriteString(httpsPrefix)
 
-		expandPath(c, l.Front(), &res)
+		ExpandPath(c, l.Front(), &res)
 
 		Convey("result should equal 'https://kafka.apache.org/expand/javadoc/index.html?overview-summary.html", func() {
 			So(res.String(), ShouldEqual, "https://kafka.apache.org/expand/javadoc/index.html?overview-summary.html")
+		})
+	})
+	Convey("Given 'g/s/me'", t, func() {
+		c, _ := loadTestYaml()
+		l := tokenize("g/s/me")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
+
+		ExpandPath(c, l.Front(), &res)
+
+		Convey("result should equal 'https://github.com/search?q=issmirnov'", func() {
+			So(res.String(), ShouldEqual, "https://github.com/search?q=issmirnov")
+		})
+	})
+	Convey("Given 'g/s/me.z'", t, func() {
+		c, _ := loadTestYaml()
+		l := tokenize("g/s/me/z")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
+
+		ExpandPath(c, l.Front(), &res)
+
+		Convey("result should equal 'https://github.com/search?q=issmirnov/zap'", func() {
+			So(res.String(), ShouldEqual, "https://github.com/search?q=issmirnov/zap")
+		})
+	})
+	Convey("Given 'g/s/ak'", t, func() {
+		c, _ := loadTestYaml()
+		l := tokenize("g/s/ak")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
+
+		ExpandPath(c, l.Front(), &res)
+
+		Convey("result should equal 'https://github.com/search?q=apache/kafka'", func() {
+			So(res.String(), ShouldEqual, "https://github.com/search?q=apache/kafka")
+		})
+	})
+	Convey("Given 'g/s/ak/c'", t, func() {
+		c, _ := loadTestYaml()
+		l := tokenize("g/s/ak/c")
+		var res bytes.Buffer
+		res.WriteString(httpsPrefix)
+
+		ExpandPath(c, l.Front(), &res)
+
+		Convey("result should equal 'https://github.com/search?q=apache/kafka+connect'", func() {
+			So(res.String(), ShouldEqual, "https://github.com/search?q=apache/kafka+connect")
 		})
 	})
 }
