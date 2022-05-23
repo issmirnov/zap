@@ -233,7 +233,7 @@ func TestExpander(t *testing.T) {
 			So(res.String(), ShouldEqual, "https://github.com/search?q=issmirnov")
 		})
 	})
-	Convey("Given 'g/s/me.z'", t, func() {
+	Convey("Given 'g/s/me/z'", t, func() {
 		c, _ := loadTestYaml()
 		l := tokenize("g/s/me/z")
 		var res bytes.Buffer
