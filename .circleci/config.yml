@@ -7,7 +7,6 @@ jobs:
   lint:
     docker:
       - image: *docker-image
-    working_directory: /go/src/github.com/issmirnov/zap
     steps:
       - checkout
       - run: diff -u <(echo -n) <(go fmt $(go list ./...))
@@ -19,7 +18,6 @@ jobs:
       # specify the version
       - image: *docker-image
 
-    working_directory: /go/src/github.com/issmirnov/zap
     steps:
       - checkout
       - run: go build -o zap -v ./cmd/
