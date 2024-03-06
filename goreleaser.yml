@@ -20,13 +20,13 @@ checksum:
   name_template: '{{ .ProjectName }}_checksums.txt'
 archives:
   - id: cmd
-    name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
-    replacements:
-      amd64: 64-bit
-      386: 32-bit
-      darwin: MacOS
-      linux: Linux
-      arm64: Arm
+    name_template: >-
+      {{- .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}64-bit
+      {{- else if eq .Arch "386" }}32-bit
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end -}}
     files:
       - c.yml
       - README.md
