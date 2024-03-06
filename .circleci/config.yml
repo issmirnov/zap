@@ -1,7 +1,7 @@
 # Golang CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-go/ for more details
-docker-image: &docker-image circleci/golang:1.22
+docker-image: &docker-image circleci/golang:1.20
 version: 2
 jobs:
   lint:
@@ -17,7 +17,7 @@ jobs:
   build_and_test:
     docker:
       # specify the version
-      - image: circleci/golang:1.22
+      - image: circleci/golang:1.20
 
     working_directory: /go/src/github.com/issmirnov/zap
     steps:
@@ -28,7 +28,7 @@ jobs:
       - run: ./e2e.sh
   release:
     docker:
-      - image: cimg/go:1.22
+      - image: cimg/go:1.20
     steps:
       - checkout
       - run: curl -sfL https://goreleaser.com/static/run | bash
