@@ -1,6 +1,6 @@
 # Zap
 
-[![Travis](https://travis-ci.org/issmirnov/zap.svg?branch=master)](https://travis-ci.org/issmirnov/zap)
+[![CircleCI](https://circleci.com/gh/issmirnov/zap.svg?style=svg)](https://circleci.com/gh/issmirnov/zap)
 [![Release](https://img.shields.io/github/release/issmirnov/zap.svg?style=flat-square)](https://github.com/issmirnov/zap/releases/latest)
 ![Total Downloads](https://img.shields.io/github/downloads/issmirnov/zap/total.svg)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
@@ -196,7 +196,7 @@ With this config, you can use the following queries:
 - `-config` - path to config file. Default is `./c.yml`
 - `-port` - port to bind to. Default is 8927. Use 80 in standalone mode.
 - `-host` - default is 127.0.0.1. Use 0.0.0.0 for a public server.
-- `-advertise` - which address to use when populating `/etc/hosts`. 
+- `-advertise` - which address to use when populating `/etc/hosts`.
   This is useful when running zap behind `dnsmasq`, so that the host bind and advertised address can differ.
 
 
