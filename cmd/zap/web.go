@@ -26,7 +26,7 @@ func IndexHandler(ctx *Context, w http.ResponseWriter, r *http.Request) (int, er
 	// Check if host present in Config.
 	children := ctx.Config.ChildrenMap()
 	if hostConfig, ok = children[host]; !ok {
-		return 404, fmt.Errorf("Shortcut '%s' not found in Config.", host)
+		return 404, fmt.Errorf("shortcut '%s' not found in config", host)
 	}
 
 	tokens := tokenize(host + r.URL.Path)
@@ -59,13 +59,19 @@ func IndexHandler(ctx *Context, w http.ResponseWriter, r *http.Request) (int, er
 // HealthHandler responds to /healthz request.
 func HealthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	io.WriteString(w, `OK`)
+	_, err := io.WriteString(w, `OK`)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 // VarsHandler responds to /varz request and prints Config.
 func VarsHandler(c *Context, w http.ResponseWriter, r *http.Request) (int, error) {
 	w.WriteHeader(http.StatusOK)
-	io.WriteString(w, jsonPrettyPrint(c.Config.String()))
+	_, err := io.WriteString(w, jsonPrettyPrint(c.Config.String()))
+	if err != nil {
+		return 500, fmt.Errorf("failed to write response: %w", err)
+	}
 	return 200, nil
 }
 

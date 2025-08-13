@@ -3,8 +3,8 @@ package zap
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -142,7 +142,7 @@ func UpdateHosts(c *Context) {
 	hostPath := "/etc/hosts"
 
 	// 1. read file, prep buffer.
-	data, err := ioutil.ReadFile(hostPath)
+	data, err := os.ReadFile(hostPath)
 	if err != nil {
 		log.Println("open Config: ", err)
 	}
@@ -166,7 +166,7 @@ func UpdateHosts(c *Context) {
 	}
 
 	// 4. Attempt write to file.
-	err = ioutil.WriteFile(hostPath, []byte(updatedFile), 0644)
+	err = os.WriteFile(hostPath, []byte(updatedFile), 0644)
 	if err != nil {
 		log.Printf("Error writing to '%s': %s\n", hostPath, err.Error())
 	}
@@ -193,6 +193,5 @@ func MakeReloadCallback(c *Context, configName string) func() {
 
 		// Sync DNS entries.
 		UpdateHosts(c)
-		return
 	}
 }

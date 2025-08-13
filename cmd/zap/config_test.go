@@ -9,31 +9,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-const duplicatedYAML = `
-e:
-  expand: example.com
-  a:
-    expand: apples
-  b:
-    expand: bananas
-g:
-  expand: github.com
-  d:
-    expand: issmirnov/dotfiles
-  z:
-    expand: issmirnov/zap
-  s:
-    query: "search?q="
-z:
-  expand: zero.com
-  ssl_off: yes
-zz:
-  expand: zero.ssl.on.com
-  ssl_off: no
-zz:
-  expand: secondaryexpansion.com
-`
-
 const badkeysYAML = `
 e:
   bad_key: example.com
@@ -127,7 +102,8 @@ func loadTestYaml() (*gabs.Container, error) {
 func TestParseYaml(t *testing.T) {
 	Convey("Given a valid 'c.yml' file", t, func() {
 		Afero = &afero.Afero{Fs: afero.NewMemMapFs()}
-		Afero.WriteFile("c.yml", []byte(cYaml), 0644)
+		err := Afero.WriteFile("c.yml", []byte(cYaml), 0644)
+		So(err, ShouldBeNil)
 		c, err := ParseYaml("c.yml")
 		Convey("ParseYaml should throw no error", func() {
 			So(err, ShouldBeNil)
