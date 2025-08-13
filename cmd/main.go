@@ -61,7 +61,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer watcher.Close()
+	defer func() {
+		if err := watcher.Close(); err != nil {
+			log.Printf("Error closing watcher: %v", err)
+		}
+	}()
 
 	cb := zap.MakeReloadCallback(context, *configName)
 	go zap.WatchConfigFileChanges(watcher, *configName, cb)

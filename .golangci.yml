@@ -1,0 +1,12 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  disable:
+    - typecheck
+    - goimports
+
+linters-settings:
+  errcheck:
+    check-blank: false
