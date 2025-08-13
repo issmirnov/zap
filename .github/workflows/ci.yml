@@ -1,0 +1,118 @@
+name: CI
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - '**.go'
+      - go.mod
+      - go.sum
+      - '.github/workflows/**'
+      - 'goreleaser.yml'
+      - 'e2e.sh'
+  pull_request:
+    branches: ["**"]
+    paths:
+      - '**.go'
+      - go.mod
+      - go.sum
+      - '.github/workflows/**'
+      - 'goreleaser.yml'
+      - 'e2e.sh'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20.x'
+          cache: true
+
+      - name: Check formatting
+        shell: bash
+        run: |
+          diff -u <(echo -n) <(go fmt $(go list ./...))
+
+      - name: Download modules
+        run: go mod download
+
+      - name: Vet
+        run: go vet -mod=readonly $(go list ./...)
+
+      - name: Run unit tests (short, race, coverage)
+        run: go test -mod=readonly -short -v ./... -race -coverprofile=coverage.txt -covermode=atomic ./cmd
+
+      - name: Run full unit tests
+        run: go test -mod=readonly -v ./...
+
+      - name: Build binary for e2e
+        run: go build -mod=readonly -o zap -v ./cmd/
+
+      - name: Ensure netcat is available (for e2e)
+        run: sudo apt-get update && sudo apt-get install -y netcat-openbsd
+
+      - name: Run e2e tests
+        run: |
+          chmod +x ./e2e.sh
+          ./e2e.sh
+
+      - name: Upload coverage and binary artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-artifacts
+          path: |
+            coverage.txt
+            zap
+
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20.x'
+          cache: true
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.1
+
+  goreleaser-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20.x'
+          cache: true
+
+      - name: GoReleaser config check
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          version: latest
+          distribution: goreleaser
+          args: check
+
