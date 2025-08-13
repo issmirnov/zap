@@ -12,7 +12,6 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/spf13/afero v1.14.0
-	golang.org/x/exp/errors v0.0.0-20200901203048-c4f52b2c50aa
 )
 
 require (
