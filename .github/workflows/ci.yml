@@ -5,6 +5,15 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  push:
+    branches: ["master"]
+    paths:
+      - '**.go'
+      - go.mod
+      - go.sum
+      - '.github/workflows/**'
+      - 'goreleaser.yml'
+      - 'e2e.sh'
   pull_request:
     branches: ["master"]
     paths:
