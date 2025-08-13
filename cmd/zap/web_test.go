@@ -1,11 +1,10 @@
 package zap
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"golang.org/x/exp/errors/fmt"
 
 	"github.com/ghodss/yaml"
 	. "github.com/smartystreets/goconvey/convey"
