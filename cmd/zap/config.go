@@ -38,28 +38,46 @@ var Afero = &afero.Afero{Fs: afero.NewOsFs()}
 
 // parseYamlString takes a raw string and attempts to load it.
 func parseYamlString(config string) (*gabs.Container, error) {
+	if config == "" {
+		return nil, fmt.Errorf("empty configuration string provided")
+	}
+
 	d, jsonErr := yaml.YAMLToJSON([]byte(config))
 	if jsonErr != nil {
-		fmt.Printf("Error encoding input to JSON.\n%s\n", jsonErr.Error())
-		return nil, jsonErr
+		return nil, fmt.Errorf("failed to parse YAML configuration: %w", jsonErr)
 	}
-	j, _ := gabs.ParseJSON(d)
+
+	j, err := gabs.ParseJSON(d)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse JSON configuration: %w", err)
+	}
 	return j, nil
 }
 
 // ParseYaml takes a file name and returns a gabs Config object.
 func ParseYaml(fname string) (*gabs.Container, error) {
+	if fname == "" {
+		return nil, fmt.Errorf("no configuration file specified")
+	}
+
 	data, err := Afero.ReadFile(fname)
 	if err != nil {
-		fmt.Printf("Unable to read file: %s\n", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("unable to read configuration file '%s': %w", fname, err)
 	}
-	d, jsonErr := yaml.YAMLToJSON([]byte(data))
+
+	if len(data) == 0 {
+		return nil, fmt.Errorf("configuration file '%s' is empty", fname)
+	}
+
+	d, jsonErr := yaml.YAMLToJSON(data)
 	if jsonErr != nil {
-		fmt.Printf("Error encoding input to JSON.\n%s\n", jsonErr.Error())
-		return nil, jsonErr
+		return nil, fmt.Errorf("failed to parse YAML configuration in file '%s': %w", fname, jsonErr)
 	}
-	j, _ := gabs.ParseJSON(d)
+
+	j, err := gabs.ParseJSON(d)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse JSON configuration in file '%s': %w", fname, err)
+	}
 	return j, nil
 }
 
@@ -67,46 +85,59 @@ func ParseYaml(fname string) (*gabs.Container, error) {
 // at each level of the Config, we should either have a KV for expansions, or a leaf node
 // with the values oneof "expand", "query", "ssl_off" that map to a string.
 func ValidateConfig(c *gabs.Container) error {
+	if c == nil {
+		return fmt.Errorf("configuration is nil")
+	}
+	
 	var errors *multierror.Error
 	children := c.ChildrenMap()
 	seenKeys := make(map[string]struct{})
+	
 	for k, v := range children {
 		// Check if key already seen
 		if _, ok := seenKeys[k]; ok {
-			log.Printf("%s detected again", k)
-			errors = multierror.Append(errors, fmt.Errorf("duplicate key detected %s", k))
+			errors = multierror.Append(errors, fmt.Errorf("duplicate key '%s' detected in configuration", k))
 		} else {
 			seenKeys[k] = exists // mark key as seen
 		}
 
 		// Validate all children
 		switch k {
-		case
-			expandKey,
-			schemaKey,
-			queryKey:
+		case expandKey:
+			// check that v is a string or number, else return error.
+			if _, ok := v.Data().(string); !ok {
+				if _, ok := v.Data().(float64); !ok {
+					errors = multierror.Append(errors, fmt.Errorf("expected string or number value for 'expand' key, got: %T (%v)", v.Data(), v.Data()))
+				}
+			}
+		case queryKey:
 			// check that v is a string, else return error.
 			if _, ok := v.Data().(string); !ok {
-				errors = multierror.Append(errors, fmt.Errorf("expected string value for %T, got: %v", k, v.Data()))
+				errors = multierror.Append(errors, fmt.Errorf("expected string value for 'query' key, got: %T (%v)", v.Data(), v.Data()))
+			}
+		case schemaKey:
+			// check that v is a string, else return error.
+			if _, ok := v.Data().(string); !ok {
+				errors = multierror.Append(errors, fmt.Errorf("expected string value for 'schema' key, got: %T (%v)", v.Data(), v.Data()))
 			}
 		case portKey:
 			// check that v is a float64, else return error.
 			if _, ok := v.Data().(float64); !ok {
-				errors = multierror.Append(errors, fmt.Errorf("expected float64 value for %T, got: %v", k, v.Data()))
+				errors = multierror.Append(errors, fmt.Errorf("expected number value for 'port' key, got: %T (%v)", v.Data(), v.Data()))
 			}
 		case sslKey:
 			// check that v is a boolean, else return error.
 			if _, ok := v.Data().(bool); !ok {
-				errors = multierror.Append(errors, fmt.Errorf("expected bool value for %T, got: %v", k, v.Data()))
+				errors = multierror.Append(errors, fmt.Errorf("expected boolean value for 'ssl_off' key, got: %T (%v)", v.Data(), v.Data()))
 			}
 		default:
 			// Check if we have an unknown string here.
 			if _, ok := v.Data().(string); ok {
-				errors = multierror.Append(errors, fmt.Errorf("unexpected string value under key %s, got: %v", k, v.Data()))
+				errors = multierror.Append(errors, fmt.Errorf("unexpected string value '%v' under key '%s' - this key is not recognized", v.Data(), k))
 			}
 			// recurse, collect any errors.
 			if err := ValidateConfig(v); err != nil {
-				errors = multierror.Append(errors, err)
+				errors = multierror.Append(errors, fmt.Errorf("validation error in section '%s': %w", k, err))
 			}
 		}
 	}
@@ -126,10 +157,12 @@ func WatchConfigFileChanges(watcher *fsnotify.Watcher, fname string, cb func()) 
 			updated := event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Write == fsnotify.Write
 			zapconf := filepath.Clean(event.Name) == fname
 			if updated && zapconf {
+				log.Printf("Configuration file '%s' changed, reloading...", fname)
 				cb()
+				log.Printf("Configuration reloaded successfully")
 			}
 		case e := <-watcher.Errors:
-			log.Println("error:", e)
+			log.Printf("File watcher error: %v", e)
 		}
 	}
 }
@@ -138,13 +171,13 @@ func WatchConfigFileChanges(watcher *fsnotify.Watcher, fname string, cb func()) 
 // UpdateHosts will attempt to write the zap list of shortcuts
 // to /etc/hosts. It will gracefully fail if there are not enough
 // permissions to do so.
-func UpdateHosts(c *Context) {
+func UpdateHosts(c *Context) error {
 	hostPath := "/etc/hosts"
 
 	// 1. read file, prep buffer.
 	data, err := os.ReadFile(hostPath)
 	if err != nil {
-		log.Println("open Config: ", err)
+		return fmt.Errorf("failed to read hosts file '%s': %w", hostPath, err)
 	}
 	var replacement bytes.Buffer
 
@@ -168,8 +201,10 @@ func UpdateHosts(c *Context) {
 	// 4. Attempt write to file.
 	err = os.WriteFile(hostPath, []byte(updatedFile), 0644)
 	if err != nil {
-		log.Printf("Error writing to '%s': %s\n", hostPath, err.Error())
+		return fmt.Errorf("failed to write to hosts file '%s': %w", hostPath, err)
 	}
+	
+	return nil
 }
 
 // MakeReloadCallback returns a func that that reads the config file and updates global state.
@@ -192,6 +227,8 @@ func MakeReloadCallback(c *Context, configName string) func() {
 		c.ConfigMtx.Unlock()
 
 		// Sync DNS entries.
-		UpdateHosts(c)
+		if err := UpdateHosts(c); err != nil {
+			log.Printf("Warning: Failed to update hosts file during reload: %v", err)
+		}
 	}
 }
