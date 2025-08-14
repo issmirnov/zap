@@ -39,27 +39,36 @@ func main() {
 	// load config for first time.
 	c, err := zap.ParseYaml(*configName)
 	if err != nil {
-		log.Printf("Error parsing config file. Please fix syntax: %s\n", err)
-		return
+		log.Fatalf("Error parsing config file '%s'. Please fix syntax: %s\n", *configName, err)
 	}
 
 	// Perform extended validation of config.
 	if *validate {
 		if err := zap.ValidateConfig(c); err != nil {
-			fmt.Println(err.Error())
+			fmt.Printf("Configuration validation failed:\n%s\n", err.Error())
 			os.Exit(1)
 		}
-		fmt.Println("No errors detected.")
+		fmt.Println("Configuration validation successful - no errors detected.")
 		os.Exit(0)
 	}
 
+	// Validate config before starting server
+	if err := zap.ValidateConfig(c); err != nil {
+		log.Fatalf("Configuration validation failed. Please fix errors before starting server:\n%s\n", err.Error())
+	}
+
 	context := &zap.Context{Config: c, Advertise: *advertise}
-	zap.UpdateHosts(context) // sync changes since last run.
+	
+	// Try to update hosts file, but don't fail if we can't
+	if err := zap.UpdateHosts(context); err != nil {
+		log.Printf("Warning: Failed to update /etc/hosts file: %v", err)
+		log.Println("Server will continue running, but DNS shortcuts may not work")
+	}
 
 	// Enable hot reload.
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to create file watcher: %v", err)
 	}
 	defer func() {
 		if err := watcher.Close(); err != nil {
@@ -71,15 +80,22 @@ func main() {
 	go zap.WatchConfigFileChanges(watcher, *configName, cb)
 	err = watcher.Add(path.Dir(*configName))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to watch config directory: %v", err)
 	}
 
 	// Set up routes.
 	router := SetupRouter(context)
 
-	// TODO check for errors - addr in use, sudo issues, etc.
-	fmt.Printf("Launching %s on %s:%d\n", appName, *host, *port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", *host, *port), router))
+	// Start the server
+	serverAddr := fmt.Sprintf("%s:%d", *host, *port)
+	fmt.Printf("Launching %s on %s\n", appName, serverAddr)
+	fmt.Printf("Configuration file: %s\n", *configName)
+	fmt.Printf("Health check: http://%s/healthz\n", serverAddr)
+	fmt.Printf("Configuration view: http://%s/varz\n", serverAddr)
+	
+	if err := http.ListenAndServe(serverAddr, router); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
 }
 
 func SetupRouter(context *zap.Context) *httprouter.Router {
