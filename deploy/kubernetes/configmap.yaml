@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zap-config
+  namespace: zap
+data:
+  c.yml: |
+    # GitHub shortcuts
+    g:
+      expand: github.com
+      z:
+        expand: issmirnov/zap
+      d:
+        expand: issmirnov/dotfiles
+      s:
+        query: search?q=
+
+    # GitLab
+    gl:
+      expand: gitlab.com
+
+    # Reddit
+    r:
+      expand: reddit.com/r
+
+    # Localhost shortcuts (for development)
+    l:
+      expand: localhost
+      ssl_off: yes
+      a:
+        port: 3000
+      b:
+        port: 8080

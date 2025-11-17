@@ -1,0 +1,49 @@
+# Example: Self-hosted Kubernetes with Cilium BGP
+# Usage: helm install zap ./helm/zap -f examples/values-cilium-bgp.yaml
+
+service:
+  type: LoadBalancer
+  loadBalancer:
+    ip: "192.168.1.100"  # Change to your desired IP
+  annotations:
+    # Cilium BGP/LB-IPAM annotations
+    io.cilium/lb-ipam-ips: "192.168.1.100"
+  labels:
+    bgp: "true"
+
+zap:
+  config: |
+    # GitHub shortcuts
+    g:
+      expand: github.com
+      z:
+        expand: issmirnov/zap
+      d:
+        expand: issmirnov/dotfiles
+      s:
+        query: search?q=
+
+    # GitLab
+    gl:
+      expand: gitlab.com
+
+    # Reddit
+    r:
+      expand: reddit.com/r
+
+    # Localhost shortcuts
+    l:
+      expand: localhost
+      ssl_off: yes
+      a:
+        port: 3000
+      b:
+        port: 8080
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 50Mi
+  limits:
+    cpu: 500m
+    memory: 128Mi

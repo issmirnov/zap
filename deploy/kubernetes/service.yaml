@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zap
+  namespace: zap
+  labels:
+    app: zap
+  annotations:
+    # Uncomment and modify based on your LoadBalancer implementation:
+
+    # For Cilium BGP:
+    # io.cilium/lb-ipam-ips: "192.168.1.100"
+
+    # For MetalLB:
+    # metallb.universe.tf/address-pool: default
+    # metallb.universe.tf/allow-shared-ip: zap
+
+    # For AWS:
+    # service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    # service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+
+    # For GCP:
+    # cloud.google.com/load-balancer-type: "Internal"
+spec:
+  type: LoadBalancer
+  # Uncomment to manually specify LoadBalancer IP (for MetalLB, Cilium, etc.):
+  # loadBalancerIP: 192.168.1.100
+
+  # Uncomment to restrict source IP ranges:
+  # loadBalancerSourceRanges:
+  #   - 10.0.0.0/8
+  #   - 192.168.0.0/16
+
+  ports:
+    - port: 80
+      targetPort: 8927
+      protocol: TCP
+      name: http
+  selector:
+    app: zap

@@ -1,0 +1,43 @@
+# Example: Self-hosted Kubernetes with MetalLB
+# Usage: helm install zap ./helm/zap -f examples/values-metallb.yaml
+
+service:
+  type: LoadBalancer
+  loadBalancer:
+    # Optional: Specify IP from MetalLB pool
+    # If not specified, MetalLB will auto-assign from configured pool
+    ip: ""
+  annotations:
+    metallb.universe.tf/address-pool: default
+    metallb.universe.tf/allow-shared-ip: zap
+
+zap:
+  config: |
+    # Work-related shortcuts
+    j:
+      expand: jira.company.com/browse
+      p:
+        expand: PROJ-
+
+    # GitHub shortcuts
+    g:
+      expand: github.com/company
+      api:
+        expand: api-service
+      web:
+        expand: web-frontend
+
+    # Internal tools
+    mon:
+      expand: monitoring.internal
+
+    grafana:
+      expand: grafana.internal
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 50Mi
+  limits:
+    cpu: 500m
+    memory: 128Mi

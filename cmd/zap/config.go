@@ -170,8 +170,14 @@ func WatchConfigFileChanges(watcher *fsnotify.Watcher, fname string, cb func()) 
 // TODO: add tests. simulate touching a file.
 // UpdateHosts will attempt to write the zap list of shortcuts
 // to /etc/hosts. It will gracefully fail if there are not enough
-// permissions to do so.
+// permissions to do so. Can be disabled via ZAP_DISABLE_HOSTS_UPDATE env var.
 func UpdateHosts(c *Context) error {
+	// Check if hosts file updates are disabled (useful for containerized environments)
+	if os.Getenv("ZAP_DISABLE_HOSTS_UPDATE") != "" {
+		log.Println("Hosts file updates disabled via ZAP_DISABLE_HOSTS_UPDATE environment variable")
+		return nil
+	}
+
 	hostPath := "/etc/hosts"
 
 	// 1. read file, prep buffer.
