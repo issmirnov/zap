@@ -160,38 +160,50 @@ jobs:
           # Port-forward in background
           kubectl port-forward $POD_NAME 8927:8927 &
           PF_PID=$!
-          sleep 3
+          sleep 5  # Give port-forward more time to establish
 
           # Test redirect (gh -> github.com)
-          REDIRECT_LOCATION=$(curl -sI -H "Host: gh" http://localhost:8927/ | grep -i "^location:" | awk '{print $2}' | tr -d '\r')
+          echo "Testing redirect: gh -> github.com"
+          REDIRECT_RESPONSE=$(curl -sS -H "Host: gh" -w "\nHTTP_CODE:%{http_code}\nREDIRECT_URL:%{redirect_url}" http://localhost:8927/ 2>&1)
+          echo "Redirect response: $REDIRECT_RESPONSE"
+
+          REDIRECT_LOCATION=$(echo "$REDIRECT_RESPONSE" | grep "^Location:" | awk '{print $2}' | tr -d '\r' || echo "$REDIRECT_RESPONSE" | grep "^REDIRECT_URL:" | cut -d: -f2-)
           EXPECTED="https://github.com/"
 
-          if [ "$REDIRECT_LOCATION" != "$EXPECTED" ]; then
+          if [ -z "$REDIRECT_LOCATION" ] || [ "$REDIRECT_LOCATION" != "$EXPECTED" ]; then
             echo "❌ Redirect test failed"
             echo "Expected: $EXPECTED"
             echo "Got: $REDIRECT_LOCATION"
-            kill $PF_PID
+            echo "Full response:"
+            curl -v -H "Host: gh" http://localhost:8927/ 2>&1 || true
+            kill $PF_PID 2>/dev/null || true
             exit 1
           fi
 
           echo "✅ Redirect test passed: gh -> $REDIRECT_LOCATION"
 
           # Test nested redirect (g/z -> github.com/issmirnov/zap)
-          REDIRECT_LOCATION=$(curl -sI -H "Host: g" http://localhost:8927/z | grep -i "^location:" | awk '{print $2}' | tr -d '\r')
+          echo "Testing nested redirect: g/z -> github.com/issmirnov/zap"
+          REDIRECT_RESPONSE=$(curl -sS -H "Host: g" -w "\nHTTP_CODE:%{http_code}\nREDIRECT_URL:%{redirect_url}" http://localhost:8927/z 2>&1)
+          echo "Redirect response: $REDIRECT_RESPONSE"
+
+          REDIRECT_LOCATION=$(echo "$REDIRECT_RESPONSE" | grep "^Location:" | awk '{print $2}' | tr -d '\r' || echo "$REDIRECT_RESPONSE" | grep "^REDIRECT_URL:" | cut -d: -f2-)
           EXPECTED="https://github.com/issmirnov/zap"
 
-          if [ "$REDIRECT_LOCATION" != "$EXPECTED" ]; then
+          if [ -z "$REDIRECT_LOCATION" ] || [ "$REDIRECT_LOCATION" != "$EXPECTED" ]; then
             echo "❌ Nested redirect test failed"
             echo "Expected: $EXPECTED"
             echo "Got: $REDIRECT_LOCATION"
-            kill $PF_PID
+            echo "Full response:"
+            curl -v -H "Host: g" http://localhost:8927/z 2>&1 || true
+            kill $PF_PID 2>/dev/null || true
             exit 1
           fi
 
           echo "✅ Nested redirect test passed: g/z -> $REDIRECT_LOCATION"
 
           # Cleanup
-          kill $PF_PID
+          kill $PF_PID 2>/dev/null || true
 
       - name: Check logs for errors
         run: |

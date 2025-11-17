@@ -20,7 +20,10 @@ COPY cmd/ ./cmd/
 # Build static binary
 # CGO_ENABLED=0 for static linking (works with scratch base)
 # -ldflags="-s -w" strips debug info for smaller binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+# Use ARG to get target platform from buildx for multi-arch builds
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -ldflags="-s -w" \
     -o zap \
     ./cmd/main.go
