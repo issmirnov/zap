@@ -60,8 +60,10 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             # Tag with major (v1.2.3 -> 1)
             type=semver,pattern={{major}}
-            # Tag with SHA for traceability
-            type=sha,prefix={{branch}}-
+            # Tag with PR number for pull requests (pr-53)
+            type=ref,event=pr
+            # Tag with SHA for traceability (sha-a0ce101)
+            type=sha,prefix=sha-
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
