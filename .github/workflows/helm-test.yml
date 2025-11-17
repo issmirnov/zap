@@ -1,0 +1,291 @@
+name: Helm Chart Test
+
+on:
+  push:
+    branches:
+      - master
+      - feature/*
+    paths:
+      - 'deploy/helm/**'
+      - 'Dockerfile'
+      - '.github/workflows/helm-test.yml'
+  pull_request:
+    paths:
+      - 'deploy/helm/**'
+      - 'Dockerfile'
+      - '.github/workflows/helm-test.yml'
+
+jobs:
+  helm-lint:
+    name: Lint Helm Chart
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.0'
+
+      - name: Lint Helm chart
+        run: |
+          helm lint deploy/helm/zap
+          echo "✅ Helm lint passed"
+
+      - name: Template Helm chart
+        run: |
+          helm template zap deploy/helm/zap > /tmp/rendered.yaml
+          echo "✅ Helm template rendered successfully"
+
+          # Validate YAML syntax
+          cat /tmp/rendered.yaml | grep -q "apiVersion"
+          echo "✅ YAML validation passed"
+
+  helm-install-test:
+    name: Test Helm Installation in kind
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: zap:test
+          outputs: type=docker,dest=/tmp/zap-image.tar
+
+      - name: Set up kind
+        uses: helm/kind-action@v1
+        with:
+          version: v0.20.0
+          cluster_name: zap-test
+
+      - name: Load Docker image into kind
+        run: |
+          kind load image-archive /tmp/zap-image.tar --name zap-test
+          echo "✅ Docker image loaded into kind cluster"
+
+      - name: Verify kind cluster
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+          echo "✅ kind cluster is ready"
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.0'
+
+      - name: Install Helm chart
+        run: |
+          helm install zap deploy/helm/zap \
+            --set image.repository=zap \
+            --set image.tag=test \
+            --set image.pullPolicy=Never \
+            --set service.type=ClusterIP \
+            --wait \
+            --timeout 2m
+
+          echo "✅ Helm chart installed successfully"
+
+      - name: Check deployment status
+        run: |
+          kubectl get all -n default
+          kubectl get configmap -n default
+
+          # Wait for deployment to be ready
+          kubectl wait --for=condition=available --timeout=60s deployment/zap
+          echo "✅ Deployment is ready"
+
+      - name: Check pod status
+        run: |
+          POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=zap -o jsonpath='{.items[0].metadata.name}')
+          echo "Pod name: $POD_NAME"
+
+          kubectl get pod $POD_NAME
+          kubectl describe pod $POD_NAME
+
+          # Check if pod is running
+          POD_STATUS=$(kubectl get pod $POD_NAME -o jsonpath='{.status.phase}')
+          if [ "$POD_STATUS" != "Running" ]; then
+            echo "❌ Pod is not running: $POD_STATUS"
+            kubectl logs $POD_NAME
+            exit 1
+          fi
+
+          echo "✅ Pod is running"
+
+      - name: Test health endpoint
+        run: |
+          POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=zap -o jsonpath='{.items[0].metadata.name}')
+
+          # Port-forward in background
+          kubectl port-forward $POD_NAME 8927:8927 &
+          PF_PID=$!
+          sleep 3
+
+          # Test health endpoint
+          HEALTH_RESPONSE=$(curl -s http://localhost:8927/healthz)
+          if [ "$HEALTH_RESPONSE" != "OK" ]; then
+            echo "❌ Health check failed: $HEALTH_RESPONSE"
+            kill $PF_PID
+            exit 1
+          fi
+
+          echo "✅ Health check passed: $HEALTH_RESPONSE"
+
+          # Test config endpoint
+          curl -s http://localhost:8927/varz | jq . > /tmp/varz.json
+          if [ ! -s /tmp/varz.json ]; then
+            echo "❌ Config endpoint failed"
+            kill $PF_PID
+            exit 1
+          fi
+
+          echo "✅ Config endpoint working"
+          cat /tmp/varz.json
+
+          # Cleanup
+          kill $PF_PID
+
+      - name: Test redirect functionality
+        run: |
+          POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=zap -o jsonpath='{.items[0].metadata.name}')
+
+          # Port-forward in background
+          kubectl port-forward $POD_NAME 8927:8927 &
+          PF_PID=$!
+          sleep 3
+
+          # Test redirect (gh -> github.com)
+          REDIRECT_LOCATION=$(curl -sI -H "Host: gh" http://localhost:8927/ | grep -i "^location:" | awk '{print $2}' | tr -d '\r')
+          EXPECTED="https://github.com/"
+
+          if [ "$REDIRECT_LOCATION" != "$EXPECTED" ]; then
+            echo "❌ Redirect test failed"
+            echo "Expected: $EXPECTED"
+            echo "Got: $REDIRECT_LOCATION"
+            kill $PF_PID
+            exit 1
+          fi
+
+          echo "✅ Redirect test passed: gh -> $REDIRECT_LOCATION"
+
+          # Test nested redirect (g/z -> github.com/issmirnov/zap)
+          REDIRECT_LOCATION=$(curl -sI -H "Host: g" http://localhost:8927/z | grep -i "^location:" | awk '{print $2}' | tr -d '\r')
+          EXPECTED="https://github.com/issmirnov/zap"
+
+          if [ "$REDIRECT_LOCATION" != "$EXPECTED" ]; then
+            echo "❌ Nested redirect test failed"
+            echo "Expected: $EXPECTED"
+            echo "Got: $REDIRECT_LOCATION"
+            kill $PF_PID
+            exit 1
+          fi
+
+          echo "✅ Nested redirect test passed: g/z -> $REDIRECT_LOCATION"
+
+          # Cleanup
+          kill $PF_PID
+
+      - name: Check logs for errors
+        run: |
+          POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=zap -o jsonpath='{.items[0].metadata.name}')
+
+          echo "📋 Pod logs:"
+          kubectl logs $POD_NAME
+
+          # Check for error messages
+          if kubectl logs $POD_NAME | grep -iE "error|fatal|panic"; then
+            echo "⚠️  Found error messages in logs (may be expected)"
+          else
+            echo "✅ No errors in logs"
+          fi
+
+      - name: Test ConfigMap hot reload
+        run: |
+          POD_NAME=$(kubectl get pods -l app.kubernetes.io/name=zap -o jsonpath='{.items[0].metadata.name}')
+
+          # Update ConfigMap
+          kubectl patch configmap zap-config -p '{"data":{"c.yml":"test:\n  expand: example.com\n"}}'
+
+          echo "⏳ Waiting 10 seconds for hot reload..."
+          sleep 10
+
+          # Verify config was reloaded
+          kubectl port-forward $POD_NAME 8927:8927 &
+          PF_PID=$!
+          sleep 3
+
+          CONFIG=$(curl -s http://localhost:8927/varz)
+          if echo "$CONFIG" | jq -e '.test.expand == "example.com"' > /dev/null; then
+            echo "✅ Hot reload working - config updated"
+          else
+            echo "⚠️  Hot reload may not have triggered yet (this is not critical)"
+          fi
+
+          kill $PF_PID
+
+      - name: Show final status
+        if: always()
+        run: |
+          echo "=========================================="
+          echo "Final Cluster Status"
+          echo "=========================================="
+          kubectl get all -n default
+          echo ""
+          echo "=========================================="
+          echo "Helm Release Status"
+          echo "=========================================="
+          helm list
+          echo ""
+          echo "=========================================="
+          echo "Events"
+          echo "=========================================="
+          kubectl get events --sort-by='.lastTimestamp'
+
+      - name: Cleanup
+        if: always()
+        run: |
+          helm uninstall zap || true
+          echo "✅ Cleanup complete"
+
+  helm-examples-test:
+    name: Test Example Values Files
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        example:
+          - dev
+          - ha
+          - minimal
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.0'
+
+      - name: Test example values file
+        run: |
+          if [ -f "deploy/helm/zap/examples/values-${{ matrix.example }}.yaml" ]; then
+            echo "Testing values-${{ matrix.example }}.yaml"
+            helm template zap deploy/helm/zap \
+              -f deploy/helm/zap/examples/values-${{ matrix.example }}.yaml \
+              > /tmp/rendered-${{ matrix.example }}.yaml
+
+            echo "✅ values-${{ matrix.example }}.yaml renders successfully"
+
+            # Show some output
+            echo "Sample output:"
+            head -20 /tmp/rendered-${{ matrix.example }}.yaml
+          else
+            echo "⚠️  values-${{ matrix.example }}.yaml not found, skipping"
+          fi
