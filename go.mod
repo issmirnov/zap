@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/smartystreets/goconvey v1.8.1
-	github.com/spf13/afero v1.14.0
+	github.com/spf13/afero v1.15.0
 )
 
 require (
