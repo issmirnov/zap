@@ -29,9 +29,19 @@ func (cw CtxWrapper) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch status {
 		case http.StatusInternalServerError:
-			http.Error(w, fmt.Sprintf("HTTP %d: %q", status, err), status)
-			// TODO - add bad request?
+			// Provide more helpful error messages for internal server errors
+			errorMsg := fmt.Sprintf("Internal Server Error: %s", err.Error())
+			http.Error(w, errorMsg, status)
+		case http.StatusNotFound:
+			// Provide helpful message for 404 errors
+			errorMsg := fmt.Sprintf("Shortcut not found: %s", err.Error())
+			http.Error(w, errorMsg, status)
+		case http.StatusBadRequest:
+			// Provide helpful message for 400 errors
+			errorMsg := fmt.Sprintf("Bad Request: %s", err.Error())
+			http.Error(w, errorMsg, status)
 		default:
+			// For other status codes, use the error message directly
 			http.Error(w, err.Error(), status)
 		}
 	}

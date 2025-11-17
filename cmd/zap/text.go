@@ -66,23 +66,27 @@ func getPrefix(c *gabs.Container) (string, int, error) {
 // At each level of recursion, it matches the token to the action described in the Config, and writes it
 // to the result buffer. There is special care needed to handle slashes correctly, which makes this function
 // quite nontrivial. Tests are crucial to ensure correctness.
-func ExpandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) {
-	expandPath(c, token, res, true)
+func ExpandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer) error {
+	return expandPath(c, token, res, true)
 }
 
 // Internal helper function that adds contextual information about whether a leading slash
 // should be added to the beginning of the path
-func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer, prependSlash bool) {
+func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer, prependSlash bool) error {
 	if token == nil {
-		return
+		return nil
 	}
+
+	if c == nil {
+		return fmt.Errorf("configuration is nil at token '%s'", token.Value)
+	}
+
 	children := c.ChildrenMap()
 	tokVal := token.Value.(string)
 	if child, ok := children[tokVal]; !isReserved(tokVal) && ok {
 		p, action, err := getPrefix(child)
 		if err != nil {
-			fmt.Println(err.Error())
-			return
+			return fmt.Errorf("failed to get prefix for token '%s': %w", tokVal, err)
 		}
 
 		prependChildSlash := true
@@ -105,17 +109,22 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer, prepe
 			res.WriteString(p)
 
 		default:
-			panic("Programmer error, this should never happen.")
+			return fmt.Errorf("invalid action type %d for token '%s'", action, tokVal)
 		}
-		expandPath(child, token.Next(), res, prependChildSlash)
-		return
+
+		if err := expandPath(child, token.Next(), res, prependChildSlash); err != nil {
+			return fmt.Errorf("failed to expand path for token '%s': %w", tokVal, err)
+		}
+		return nil
 	} else if child, ok := children[passKey]; ok {
 		if prependSlash {
 			res.WriteString("/")
 		}
 		res.WriteString(token.Value.(string))
-		expandPath(child, token.Next(), res, true)
-		return
+		if err := expandPath(child, token.Next(), res, true); err != nil {
+			return fmt.Errorf("failed to expand pass-through path for token '%s': %w", tokVal, err)
+		}
+		return nil
 	}
 
 	// if tokens left over, append the rest
@@ -127,6 +136,8 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer, prepe
 		}
 		res.WriteString(e.Value.(string))
 	}
+
+	return nil
 }
 
 func isReserved(pathElem string) bool {

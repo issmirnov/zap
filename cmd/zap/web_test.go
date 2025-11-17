@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Jeffail/gabs/v2"
 	"github.com/ghodss/yaml"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -292,6 +293,37 @@ func TestIndexHandler(t *testing.T) {
 		})
 
 	})
+}
+
+func TestIndexHandlerErrorHandling(t *testing.T) {
+	// Test case: nil configuration
+	ctx := &Context{Config: nil}
+	req := httptest.NewRequest("GET", "/", nil)
+	req.Host = "test.com"
+	w := httptest.NewRecorder()
+
+	status, err := IndexHandler(ctx, w, req)
+	if status != http.StatusInternalServerError {
+		t.Errorf("Expected status %d, got %d", http.StatusInternalServerError, status)
+	}
+	if err == nil {
+		t.Error("Expected error for nil configuration")
+	}
+
+	// Test case: host not found in configuration
+	config := gabs.New()
+	ctx = &Context{Config: config}
+	req = httptest.NewRequest("GET", "/", nil)
+	req.Host = "nonexistent.com"
+	w = httptest.NewRecorder()
+
+	status, err = IndexHandler(ctx, w, req)
+	if status != http.StatusNotFound {
+		t.Errorf("Expected status %d, got %d", http.StatusNotFound, status)
+	}
+	if err == nil {
+		t.Error("Expected error for nonexistent host")
+	}
 }
 
 // BenchmarkIndexHandler tests request processing speed when Context is preloaded.

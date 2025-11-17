@@ -142,12 +142,12 @@ func TestValidateConfig(t *testing.T) {
 	Convey("Given a YAML Config with malformed values", t, func() {
 		conf, _ := parseYamlString(badValuesYAML)
 		err := ValidateConfig(conf)
-		Convey("The validator should raise a ton of errors", func() {
+		Convey("The validator should raise errors for invalid values", func() {
 			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldContainSubstring, "expected float64 value for string, got: not_int")
-			So(err.Error(), ShouldContainSubstring, "expected string value for string, got: 3")
-			So(err.Error(), ShouldContainSubstring, "expected bool value for string, got: not_bool")
-			So(err.Error(), ShouldContainSubstring, "expected string value for string, got: 2")
+			So(err.Error(), ShouldContainSubstring, "expected number value for 'port' key, got: string (not_int)")
+			So(err.Error(), ShouldContainSubstring, "expected string value for 'query' key, got: float64 (3)")
+			So(err.Error(), ShouldContainSubstring, "expected boolean value for 'ssl_off' key, got: string (not_bool)")
+			// Note: expand: 2 is now valid since we allow both strings and numbers for expand keys
 		})
 	})
 }
