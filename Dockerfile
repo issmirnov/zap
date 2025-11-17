@@ -56,6 +56,8 @@ ENV ZAP_DISABLE_HOSTS_UPDATE=1
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8927/healthz || exit 1
 
-# Default command - users should mount config at /etc/zap/c.yml
-# or override with their own command
-CMD ["zap", "-host", "0.0.0.0", "-port", "8927", "-config", "/etc/zap/c.yml"]
+# Set entrypoint to zap binary
+ENTRYPOINT ["zap"]
+
+# Default arguments - can be overridden
+CMD ["-host", "0.0.0.0", "-port", "8927", "-config", "/etc/zap/c.yml"]

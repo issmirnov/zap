@@ -2,9 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Number of replicas (1 is usually sufficient for most use cases)
-replicaCount: 1
+# ============================================================================
+# COMMON CUSTOMIZATIONS - Values you'll likely want to override
+# ============================================================================
 
+# Image configuration
+# 👉 Update these if using a custom registry or specific version
 image:
   # Image repository
   repository: ghcr.io/issmirnov/zap
@@ -12,6 +15,22 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion
   tag: ""
+
+# Service configuration
+# 👉 Customize type, ports, and LoadBalancer settings for your environment
+# See service: section below (line 50+)
+
+# Zap shortcuts configuration
+# 👉 THIS IS THE MAIN THING TO CUSTOMIZE
+# See zap.config: section below (line 150+)
+
+# ============================================================================
+# STANDARD KUBERNETES SETTINGS - Usually fine as defaults
+# ============================================================================
+
+# Number of replicas (1 is usually sufficient for most use cases)
+# ⚠️ Usually no need to change this
+replicaCount: 1
 
 # Image pull secrets for private registries
 imagePullSecrets: []
@@ -34,6 +53,8 @@ podAnnotations: {}
   # Example annotations for Reloader (optional - enables automatic reload on ConfigMap changes)
   # reloader.stakater.com/auto: "true"
 
+# Security contexts - Best practices for production
+# ⚠️ Usually no need to change these
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 1000
@@ -49,20 +70,30 @@ securityContext:
 
 service:
   # Service type: LoadBalancer, ClusterIP, or NodePort
+  # 👉 Change to ClusterIP if using Ingress instead
   type: LoadBalancer
-  # Port the service will expose
+
+  # Port the service will expose (standard HTTP port)
+  # 👉 Usually keep as 80 for easy access
   port: 80
-  # Target port on the container
+
+  # Target port on the container (Zap's default port)
+  # ⚠️ Should match zap.port below - usually no need to change
   targetPort: 8927
+
   # Node port (only used if type is NodePort)
   nodePort: null
 
   # LoadBalancer-specific settings
+  # 👉 Configure these for self-hosted k8s or to restrict access
   loadBalancer:
     # Manually specify LoadBalancer IP (optional)
     # Useful for self-hosted k8s with MetalLB or Cilium BGP
+    # Example: ip: "192.168.1.100"
     ip: ""
+
     # Source IP ranges that can access the LoadBalancer
+    # Use to restrict access to your network only
     sourceRanges: []
     # Example:
     # sourceRanges:
@@ -106,11 +137,10 @@ ingress:
   #    hosts:
   #      - zap.local
 
+# Resource limits and requests
+# These defaults are suitable for typical Zap workloads (handles 150k+ QPS)
+# ⚠️ Usually no need to change unless you have specific requirements
 resources:
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
     cpu: 500m
     memory: 128Mi
@@ -133,27 +163,51 @@ tolerations: []
 affinity: {}
 
 # Zap-specific configuration
+# Note: These are sensible defaults for Kubernetes. Most users only need to customize zap.config
 zap:
-  # Port Zap will bind to inside the container
+  # Port Zap will bind to inside the container (default: 8927)
+  # ⚠️ Usually no need to change this
   port: 8927
+
   # Host Zap will bind to (0.0.0.0 for all interfaces in k8s)
+  # ⚠️ Usually no need to change this
   host: "0.0.0.0"
-  # Advertised IP (used for /etc/hosts, but disabled in k8s)
+
+  # Advertised IP (used for /etc/hosts, but disabled in k8s via ZAP_DISABLE_HOSTS_UPDATE)
+  # ⚠️ Usually no need to change this
   advertise: "127.0.0.1"
 
   # Configuration file content (c.yml)
-  # This is the main Zap configuration defining shortcuts
+  # 👉 THIS IS WHAT YOU CUSTOMIZE - define your shortcuts here
   config: |
-    # Example Zap configuration
-    # Customize this with your own shortcuts
+    # Common shortcuts
     g:
       expand: github.com
       z:
         expand: issmirnov/zap
-    r:
-      expand: reddit.com/r
+      issues:
+        expand: issmirnov/zap/issues
     gh:
       expand: github.com
+    r:
+      expand: reddit.com/r
+    hn:
+      expand: news.ycombinator.com
+
+    # Search shortcuts
+    s:
+      query: google.com/search?q=
+    so:
+      query: stackoverflow.com/search?q=
+
+    # Add your own shortcuts below
+    # Examples:
+    # d:
+    #   expand: drive.google.com
+    # docs:
+    #   expand: docs.google.com
+    # gm:
+    #   expand: gmail.com
 
 # Hot reload support
 # Stakater Reloader can automatically restart pods when ConfigMap changes
@@ -165,6 +219,7 @@ hotReload:
   enabled: false
 
 # Health check configuration
+# ⚠️ Usually no need to change these - production-ready defaults
 healthCheck:
   enabled: true
   # Path for liveness probe
