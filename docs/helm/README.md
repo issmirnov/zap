@@ -1,29 +1,33 @@
 # Helm Chart Documentation
 
-This directory contains comprehensive documentation for deploying Zap to Kubernetes using Helm.
+Complete documentation for deploying Zap to Kubernetes using Helm.
 
-## Quick Start
+## Documentation Files
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Get started quickly with minimal configuration
+### [QUICKSTART.md](QUICKSTART.md)
+Quick reference guide for minimal configuration. Start here if you want to get Zap deployed fast with sensible defaults.
 
-## Implementation Details
+### [KUBERNETES.md](KUBERNETES.md)
+Comprehensive Kubernetes deployment guide covering:
+- Architecture overview
+- Prerequisites and setup
+- Network DNS configuration
+- Deployment examples (Cilium BGP, MetalLB, HA)
+- Configuration management
+- Troubleshooting
+- Advanced topics
 
-- **[KUBERNETES.md](KUBERNETES.md)** - Complete Kubernetes deployment guide
-- **[K8S-IMPLEMENTATION-SUMMARY.md](K8S-IMPLEMENTATION-SUMMARY.md)** - Implementation overview and decisions
-- **[CHANGELOG-K8S.md](CHANGELOG-K8S.md)** - What changed to add Kubernetes support
+### [CI-CD.md](CI-CD.md)
+Complete CI/CD testing documentation:
+- Automated Helm chart testing with kind
+- 3-job parallel test workflow
+- Issues found and fixed
+- Local testing instructions
+- Integration with existing CI
 
-## Helm Chart Configuration
+## Quick Links
 
-- **[HELM-VALUES-IMPROVEMENTS.md](HELM-VALUES-IMPROVEMENTS.md)** - How values.yaml is organized and why
-
-## CI/CD Testing
-
-- **[CI-CD-SUMMARY.md](CI-CD-SUMMARY.md)** - Complete CI/CD implementation summary
-- **[HELM-TEST-WORKFLOW.md](HELM-TEST-WORKFLOW.md)** - Workflow overview and benefits
-- **[HELM-TEST-README.md](HELM-TEST-README.md)** - Detailed testing workflow documentation
-
-## Related Files
-
-- Helm chart: `/deploy/helm/zap/`
-- CI/CD workflow: `/.github/workflows/helm-test.yml`
-- Example values: `/deploy/helm/zap/examples/`
+- **Helm chart**: `/deploy/helm/zap/`
+- **CI/CD workflow**: `/.github/workflows/helm-test.yml`
+- **Example values**: `/deploy/helm/zap/examples/`
+- **Plain manifests**: `/deploy/kubernetes/`
