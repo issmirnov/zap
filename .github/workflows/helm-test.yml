@@ -167,13 +167,19 @@ jobs:
           REDIRECT_RESPONSE=$(curl -sS -H "Host: gh" -w "\nHTTP_CODE:%{http_code}\nREDIRECT_URL:%{redirect_url}" http://localhost:8927/ 2>&1)
           echo "Redirect response: $REDIRECT_RESPONSE"
 
-          REDIRECT_LOCATION=$(echo "$REDIRECT_RESPONSE" | grep "^Location:" | awk '{print $2}' | tr -d '\r' || echo "$REDIRECT_RESPONSE" | grep "^REDIRECT_URL:" | cut -d: -f2-)
+          # Parse redirect URL - handle both Location header and curl's redirect_url
+          REDIRECT_LOCATION=$(echo "$REDIRECT_RESPONSE" | grep "^Location:" | awk '{print $2}' | tr -d '\r')
+          if [ -z "$REDIRECT_LOCATION" ]; then
+            # Fallback to curl's redirect_url format (REDIRECT_URL:https://...)
+            REDIRECT_LOCATION=$(echo "$REDIRECT_RESPONSE" | grep "^REDIRECT_URL:" | sed 's/^REDIRECT_URL://')
+          fi
+
           EXPECTED="https://github.com/"
 
           if [ -z "$REDIRECT_LOCATION" ] || [ "$REDIRECT_LOCATION" != "$EXPECTED" ]; then
             echo "❌ Redirect test failed"
             echo "Expected: $EXPECTED"
-            echo "Got: $REDIRECT_LOCATION"
+            echo "Got: '$REDIRECT_LOCATION'"
             echo "Full response:"
             curl -v -H "Host: gh" http://localhost:8927/ 2>&1 || true
             kill $PF_PID 2>/dev/null || true
@@ -187,13 +193,19 @@ jobs:
           REDIRECT_RESPONSE=$(curl -sS -H "Host: g" -w "\nHTTP_CODE:%{http_code}\nREDIRECT_URL:%{redirect_url}" http://localhost:8927/z 2>&1)
           echo "Redirect response: $REDIRECT_RESPONSE"
 
-          REDIRECT_LOCATION=$(echo "$REDIRECT_RESPONSE" | grep "^Location:" | awk '{print $2}' | tr -d '\r' || echo "$REDIRECT_RESPONSE" | grep "^REDIRECT_URL:" | cut -d: -f2-)
+          # Parse redirect URL - handle both Location header and curl's redirect_url
+          REDIRECT_LOCATION=$(echo "$REDIRECT_RESPONSE" | grep "^Location:" | awk '{print $2}' | tr -d '\r')
+          if [ -z "$REDIRECT_LOCATION" ]; then
+            # Fallback to curl's redirect_url format (REDIRECT_URL:https://...)
+            REDIRECT_LOCATION=$(echo "$REDIRECT_RESPONSE" | grep "^REDIRECT_URL:" | sed 's/^REDIRECT_URL://')
+          fi
+
           EXPECTED="https://github.com/issmirnov/zap"
 
           if [ -z "$REDIRECT_LOCATION" ] || [ "$REDIRECT_LOCATION" != "$EXPECTED" ]; then
             echo "❌ Nested redirect test failed"
             echo "Expected: $EXPECTED"
-            echo "Got: $REDIRECT_LOCATION"
+            echo "Got: '$REDIRECT_LOCATION'"
             echo "Full response:"
             curl -v -H "Host: g" http://localhost:8927/z 2>&1 || true
             kill $PF_PID 2>/dev/null || true
