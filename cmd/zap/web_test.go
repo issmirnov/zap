@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Jeffail/gabs/v2"
 	"github.com/ghodss/yaml"
 	. "github.com/smartystreets/goconvey/convey"
-	"github.com/Jeffail/gabs/v2"
 )
 
 // TODO: add tests that use erroneous Config.

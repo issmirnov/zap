@@ -88,11 +88,11 @@ func ValidateConfig(c *gabs.Container) error {
 	if c == nil {
 		return fmt.Errorf("configuration is nil")
 	}
-	
+
 	var errors *multierror.Error
 	children := c.ChildrenMap()
 	seenKeys := make(map[string]struct{})
-	
+
 	for k, v := range children {
 		// Check if key already seen
 		if _, ok := seenKeys[k]; ok {
@@ -203,7 +203,7 @@ func UpdateHosts(c *Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to write to hosts file '%s': %w", hostPath, err)
 	}
-	
+
 	return nil
 }
 

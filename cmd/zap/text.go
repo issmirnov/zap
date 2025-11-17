@@ -76,11 +76,11 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer, prepe
 	if token == nil {
 		return nil
 	}
-	
+
 	if c == nil {
 		return fmt.Errorf("configuration is nil at token '%s'", token.Value)
 	}
-	
+
 	children := c.ChildrenMap()
 	tokVal := token.Value.(string)
 	if child, ok := children[tokVal]; !isReserved(tokVal) && ok {
@@ -111,7 +111,7 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer, prepe
 		default:
 			return fmt.Errorf("invalid action type %d for token '%s'", action, tokVal)
 		}
-		
+
 		if err := expandPath(child, token.Next(), res, prependChildSlash); err != nil {
 			return fmt.Errorf("failed to expand path for token '%s': %w", tokVal, err)
 		}
@@ -136,7 +136,7 @@ func expandPath(c *gabs.Container, token *list.Element, res *bytes.Buffer, prepe
 		}
 		res.WriteString(e.Value.(string))
 	}
-	
+
 	return nil
 }
 

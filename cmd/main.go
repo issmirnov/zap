@@ -58,7 +58,7 @@ func main() {
 	}
 
 	context := &zap.Context{Config: c, Advertise: *advertise}
-	
+
 	// Try to update hosts file, but don't fail if we can't
 	if err := zap.UpdateHosts(context); err != nil {
 		log.Printf("Warning: Failed to update /etc/hosts file: %v", err)
@@ -92,7 +92,7 @@ func main() {
 	fmt.Printf("Configuration file: %s\n", *configName)
 	fmt.Printf("Health check: http://%s/healthz\n", serverAddr)
 	fmt.Printf("Configuration view: http://%s/varz\n", serverAddr)
-	
+
 	if err := http.ListenAndServe(serverAddr, router); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
