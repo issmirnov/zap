@@ -1,0 +1,51 @@
+# Example: High-Availability deployment with autoscaling
+# Usage: helm install zap ./helm/zap -f examples/values-ha.yaml
+
+replicaCount: 3
+
+service:
+  type: LoadBalancer
+
+# Enable autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+# Pod anti-affinity for better availability
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - zap
+          topologyKey: kubernetes.io/hostname
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 100Mi
+  limits:
+    cpu: 1000m
+    memory: 256Mi
+
+# Enable Reloader for automatic restarts
+podAnnotations:
+  reloader.stakater.com/auto: "true"
+
+zap:
+  config: |
+    g:
+      expand: github.com
+    gh:
+      expand: github.com
+    gl:
+      expand: gitlab.com
+    r:
+      expand: reddit.com/r

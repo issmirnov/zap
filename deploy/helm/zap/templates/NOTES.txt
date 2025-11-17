@@ -1,0 +1,110 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+{{- if eq .Values.service.type "LoadBalancer" }}
+
+Zap is exposed via a LoadBalancer service.
+
+1. Get the LoadBalancer IP:
+
+   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+
+   You can watch the status by running:
+
+     kubectl get svc {{ include "zap.fullname" . }} -n {{ .Release.Namespace }} --watch
+
+   Once available, get the IP with:
+
+     export SERVICE_IP=$(kubectl get svc {{ include "zap.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+     echo "Zap LoadBalancer IP: $SERVICE_IP"
+
+2. Configure your DNS to point shortcuts to this IP:
+
+   Option A: Wildcard DNS (recommended)
+
+     *.zap.yourdomain.local -> $SERVICE_IP
+
+   Option B: Individual DNS records for each shortcut
+
+     g.zap.yourdomain.local -> $SERVICE_IP
+     gh.zap.yourdomain.local -> $SERVICE_IP
+
+3. Test Zap:
+
+   Health check:
+
+     curl http://$SERVICE_IP/healthz
+
+   View configuration:
+
+     curl http://$SERVICE_IP/varz
+
+   Test a shortcut (using Host header):
+
+     curl -I -H "Host: g" http://$SERVICE_IP/z
+
+{{- else if eq .Values.service.type "NodePort" }}
+
+Zap is exposed via a NodePort service.
+
+1. Get the Node IP and Port:
+
+   export NODE_PORT=$(kubectl get svc {{ include "zap.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.spec.ports[0].nodePort}')
+   export NODE_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[0].address}')
+
+   echo "Zap is available at: http://$NODE_IP:$NODE_PORT"
+
+2. Test Zap:
+
+   curl http://$NODE_IP:$NODE_PORT/healthz
+
+{{- else if eq .Values.service.type "ClusterIP" }}
+
+Zap is exposed via a ClusterIP service (cluster-internal only).
+
+1. Access Zap from within the cluster:
+
+   kubectl run -it --rm debug --image=alpine --restart=Never -- sh
+
+   # Inside the pod:
+   apk add curl
+   curl http://{{ include "zap.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local/healthz
+
+2. Or port-forward to access locally:
+
+   kubectl port-forward svc/{{ include "zap.fullname" . }} -n {{ .Release.Namespace }} 8927:{{ .Values.service.port }}
+
+   # Then access at:
+   curl http://localhost:8927/healthz
+
+{{- end }}
+
+Configuration:
+--------------
+To update Zap shortcuts, edit the ConfigMap:
+
+  kubectl edit configmap {{ include "zap.fullname" . }}-config -n {{ .Release.Namespace }}
+
+{{- if .Values.hotReload.enabled }}
+The pods will automatically restart when the ConfigMap changes (Reloader enabled).
+{{- else }}
+After editing, restart the deployment for changes to take effect:
+
+  kubectl rollout restart deployment/{{ include "zap.fullname" . }} -n {{ .Release.Namespace }}
+
+Note: Zap has built-in hot reload via inotify. Changes to the ConfigMap volume
+should be picked up automatically without restart, though timing depends on
+Kubernetes' ConfigMap propagation delay (up to 60 seconds).
+
+For automatic restarts on ConfigMap changes, consider installing Stakater Reloader:
+https://github.com/stakater/Reloader
+{{- end }}
+
+For more information about Zap, visit:
+https://github.com/issmirnov/zap

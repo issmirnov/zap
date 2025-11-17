@@ -1,0 +1,23 @@
+# Example: Development/testing deployment with minimal resources
+# Usage: helm install zap ./helm/zap -f examples/values-dev.yaml
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 32Mi
+  limits:
+    cpu: 200m
+    memory: 64Mi
+
+zap:
+  config: |
+    # Simple test configuration
+    g:
+      expand: github.com
+    test:
+      expand: example.com

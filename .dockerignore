@@ -1,0 +1,43 @@
+# Git
+.git/
+.gitignore
+.github/
+
+# Build artifacts
+zap
+*.exe
+dist/
+
+# Documentation
+*.md
+!README.md
+LICENSE
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test files
+*_test.go
+coverage.txt
+
+# CI/CD
+.circleci/
+
+# Local config
+c.yml
+*.yml
+!go.yml
+
+# Memory bank (project-specific)
+.claude/
+
+# Scripts
+e2e.sh
+goreleaser.yml
+
+# OS
+.DS_Store

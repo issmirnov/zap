@@ -21,6 +21,39 @@ Zap runs as an HTTP service, and can live on the standard web ports or behind a 
 
 ## Installation
 
+### Docker & Kubernetes
+
+**New!** Zap is now available as a container image and Helm chart for Kubernetes deployment.
+
+#### Docker
+
+```bash
+# Pull the image from GitHub Container Registry
+docker pull ghcr.io/issmirnov/zap:latest
+
+# Run with your config mounted
+docker run -d \
+  -p 80:8927 \
+  -v $(pwd)/c.yml:/etc/zap/c.yml:ro \
+  ghcr.io/issmirnov/zap:latest
+```
+
+#### Kubernetes (Helm)
+
+```bash
+# Install with default configuration
+helm install zap ./deploy/helm/zap
+
+# Or with custom values
+helm install zap ./deploy/helm/zap -f values-custom.yaml
+```
+
+See [deploy/README.md](deploy/README.md) for comprehensive Kubernetes deployment documentation, including:
+- LoadBalancer configuration for Cilium BGP and MetalLB
+- DNS setup for network-wide shortcuts
+- High availability and autoscaling
+- Configuration examples for various scenarios
+
 ### Ansible
 
 If you know how to use ansible, head over to the [ansible galaxy](https://galaxy.ansible.com/issmirnov/zap/) and install this role as `issmirnov.zap`. I've done the heavy lifting for you. If you want to do this by hand, read on.

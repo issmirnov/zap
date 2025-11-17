@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zap
+  namespace: zap
+  labels:
+    app: zap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zap
+  template:
+    metadata:
+      labels:
+        app: zap
+      annotations:
+        # Optional: If you have Stakater Reloader installed
+        # reloader.stakater.com/auto: "true"
+    spec:
+      serviceAccountName: default
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: zap
+        image: ghcr.io/issmirnov/zap:latest
+        imagePullPolicy: IfNotPresent
+        args:
+          - "-host"
+          - "0.0.0.0"
+          - "-port"
+          - "8927"
+          - "-config"
+          - "/etc/zap/c.yml"
+          - "-advertise"
+          - "127.0.0.1"
+        env:
+          - name: ZAP_DISABLE_HOSTS_UPDATE
+            value: "1"
+        ports:
+        - name: http
+          containerPort: 8927
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 50Mi
+          limits:
+            cpu: 500m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+        - name: config
+          mountPath: /etc/zap
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: config
+        configMap:
+          name: zap-config
+      - name: tmp
+        emptyDir: {}

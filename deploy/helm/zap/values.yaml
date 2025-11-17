@@ -1,0 +1,184 @@
+# Default values for zap.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Number of replicas (1 is usually sufficient for most use cases)
+replicaCount: 1
+
+image:
+  # Image repository
+  repository: ghcr.io/issmirnov/zap
+  # Image pull policy
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion
+  tag: ""
+
+# Image pull secrets for private registries
+imagePullSecrets: []
+
+# Override the name of the chart
+nameOverride: ""
+# Override the full name of the release
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+  # Example annotations for Reloader (optional - enables automatic reload on ConfigMap changes)
+  # reloader.stakater.com/auto: "true"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+
+service:
+  # Service type: LoadBalancer, ClusterIP, or NodePort
+  type: LoadBalancer
+  # Port the service will expose
+  port: 80
+  # Target port on the container
+  targetPort: 8927
+  # Node port (only used if type is NodePort)
+  nodePort: null
+
+  # LoadBalancer-specific settings
+  loadBalancer:
+    # Manually specify LoadBalancer IP (optional)
+    # Useful for self-hosted k8s with MetalLB or Cilium BGP
+    ip: ""
+    # Source IP ranges that can access the LoadBalancer
+    sourceRanges: []
+    # Example:
+    # sourceRanges:
+    #   - "10.0.0.0/8"
+    #   - "192.168.0.0/16"
+
+  # Service annotations (for MetalLB, Cilium BGP, cloud providers, etc.)
+  annotations: {}
+    # Example for Cilium BGP:
+    # io.cilium/lb-ipam-ips: "192.168.1.100"
+    #
+    # Example for MetalLB:
+    # metallb.universe.tf/address-pool: default
+    # metallb.universe.tf/allow-shared-ip: zap
+    #
+    # Example for AWS:
+    # service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    # service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+    #
+    # Example for GCP:
+    # cloud.google.com/load-balancer-type: "Internal"
+
+  # Service labels
+  labels: {}
+    # Example for Cilium BGP:
+    # bgp: "true"
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: zap.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: zap-tls
+  #    hosts:
+  #      - zap.local
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 500m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 50Mi
+
+# Autoscaling (optional - usually not needed for Zap)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Zap-specific configuration
+zap:
+  # Port Zap will bind to inside the container
+  port: 8927
+  # Host Zap will bind to (0.0.0.0 for all interfaces in k8s)
+  host: "0.0.0.0"
+  # Advertised IP (used for /etc/hosts, but disabled in k8s)
+  advertise: "127.0.0.1"
+
+  # Configuration file content (c.yml)
+  # This is the main Zap configuration defining shortcuts
+  config: |
+    # Example Zap configuration
+    # Customize this with your own shortcuts
+    g:
+      expand: github.com
+      z:
+        expand: issmirnov/zap
+    r:
+      expand: reddit.com/r
+    gh:
+      expand: github.com
+
+# Hot reload support
+# Stakater Reloader can automatically restart pods when ConfigMap changes
+# Install: https://github.com/stakater/Reloader
+# If you have Reloader installed, set podAnnotations.reloader.stakater.com/auto: "true"
+hotReload:
+  # Note: Zap has built-in hot reload via inotify, which should work with ConfigMap volume updates
+  # Reloader is optional and provides additional restart capability if needed
+  enabled: false
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  # Path for liveness probe
+  livenessPath: /healthz
+  # Path for readiness probe
+  readinessPath: /healthz
+  # Probe settings
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
